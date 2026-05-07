@@ -7,7 +7,7 @@
 
 ## ✦ 项目简介
 
-𝓡𝓾𝓲𝔃𝔻 Navigation 是一款**全功能浏览器起始页与导航系统**，采用前沿的 Glassmorphism（毛玻璃）设计语言，集信息聚合、智能搜索、影音娱乐、效率工具于一体，旨在为用户提供沉浸式、高效率的上网起始体验。
+𝓡𝓾𝓲𝔃𝔃 Navigation 是一款**全功能浏览器起始页与导航系统**，采用前沿的 Glassmorphism（毛玻璃）设计语言，集信息聚合、智能搜索、影音娱乐、效率工具于一体，旨在为用户提供沉浸式、高效率的上网起始体验。
 
 ---
 
@@ -79,12 +79,12 @@ git clone https://github.com/1367014277/Ruizz-nav.git
 本项目基于 **MIT License** 开源，欢迎 Fork / Star / PR。
 
 ```
-MIT License © 2025 𝓡𝓾𝓲𝔃𝔻
+MIT License © 2025 𝓡𝓾𝓲𝔃𝔃
 ```
 
 ---
 
 <p align="center">
   ⭐ 如果这个项目对你有帮助，欢迎点个 Star ⭐<br>
-  🐾 Made with love by 𝓡𝓾𝓲𝔃𝔻
+  🐾 Made with love by 𝓡𝓾𝓲𝔃𝔃
 </p>
