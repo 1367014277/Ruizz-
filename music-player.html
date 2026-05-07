@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎵 随机音乐播放器</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.music-card {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 40px 50px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.music-title {
+  color: rgba(255,255,255,0.9);
+  font-size: 16px;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+
+.play-btn {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #667eea, #764ba2);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 25px;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.play-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.7);
+}
+
+.play-btn:active {
+  transform: scale(0.95);
+}
+
+.play-icon {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 22px 0 22px 36px;
+  border-color: transparent transparent transparent #fff;
+  margin-left: 6px;
+  transition: all 0.2s;
+}
+
+.play-btn.playing .play-icon {
+  border-style: double;
+  border-width: 0 0 0 36px;
+  margin-left: 0;
+}
+
+.play-btn.playing .play-icon::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 28px;
+  background: #fff;
+  margin-left: -22px;
+}
+
+.song-name {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  min-height: 27px;
+}
+
+.song-artist {
+  color: rgba(255,255,255,0.6);
+  font-size: 14px;
+  min-height: 21px;
+}
+
+.loading {
+  color: rgba(255,255,255,0.7);
+  font-size: 14px;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.hint {
+  color: rgba(255,255,255,0.4);
+  font-size: 12px;
+  margin-top: 25px;
+}
+
+/* 背景动画 */
+.bg-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  z-index: -1;
+}
+
+.bg-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: #667eea;
+  top: -100px;
+  left: -100px;
+  animation: float 8s ease-in-out infinite;
+}
+
+.bg-orb-2 {
+  width: 300px;
+  height: 300px;
+  background: #764ba2;
+  bottom: -50px;
+  right: -50px;
+  animation: float 10s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(30px, 30px); }
+}
+
+audio { display: none; }
+</style>
+</head>
+<body>
+
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+
+<div class="music-card">
+  <div class="music-title">♪ 随机音乐播放器 ♪</div>
+  
+  <button class="play-btn" id="playBtn" onclick="togglePlay()">
+    <div class="play-icon"></div>
+  </button>
+  
+  <div class="song-name" id="songName"></div>
+  <div class="song-artist" id="songArtist"></div>
+  
+  <div class="hint">点击播放按钮随机播放歌曲</div>
+</div>
+
+<audio id="audioPlayer"></audio>
+
+<script>
+// 免费音乐列表（使用可靠的公开音频源）
+const musicList = [
+  { name: "River Flows In You", artist: "Yiruma", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+  { name: "Canon in D Major", artist: "Johann Pachelbel", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+  { name: "Summer Wind", artist: "Jazz Music", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+  { name: "Swan Lake", artist: "Classical", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+  { name: "Fur Elise", artist: "Beethoven", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+  { name: "Moonlight Sonata", artist: "Beethoven", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
+  { name: "Turkish March", artist: "Mozart", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3" },
+  { name: "Dance of the Swans", artist: "Tchaikovsky", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" },
+  { name: "Serenade No.13", artist: "Mozart", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" },
+  { name: "Happy Melodies", artist: "Upbeat Music", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" },
+  { name: "Ambient Piano", artist: "Relaxing Music", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3" },
+  { name: "Electronic Dreams", artist: "Synth Music", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3" },
+  { name: "Guitar Strings", artist: "Acoustic", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3" },
+  { name: "Drum Beat", artist: "Percussion", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3" },
+  { name: "Bass Line", artist: "Deep Music", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3" },
+  { name: "Melody Flow", artist: "Instrumental", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3" }
+];
+
+let isPlaying = false;
+let currentSongIndex = -1;
+const audio = document.getElementById('audioPlayer');
+const playBtn = document.getElementById('playBtn');
+const songName = document.getElementById('songName');
+const songArtist = document.getElementById('songArtist');
+
+// 随机选择歌曲
+function getRandomSong() {
+  let newIndex;
+  do {
+    newIndex = Math.floor(Math.random() * musicList.length);
+  } while (newIndex === currentSongIndex && musicList.length > 1);
+  return newIndex;
+}
+
+// 播放指定歌曲
+function playSong(index) {
+  const song = musicList[index];
+  songName.textContent = '🎵 ' + song.name;
+  songArtist.textContent = song.artist;
+  
+  audio.src = song.url;
+  audio.play().catch(err => {
+    console.log('播放失败，自动切换下一首...');
+    nextSong();
+  });
+  
+  currentSongIndex = index;
+  isPlaying = true;
+  playBtn.classList.add('playing');
+}
+
+// 切换播放/暂停
+function togglePlay() {
+  if (!isPlaying) {
+    if (currentSongIndex === -1) {
+      // 首次播放，随机选一首
+      playSong(getRandomSong());
+    } else {
+      // 继续播放当前歌曲
+      audio.play();
+      isPlaying = true;
+      playBtn.classList.add('playing');
+    }
+  } else {
+    // 暂停
+    audio.pause();
+    isPlaying = false;
+    playBtn.classList.remove('playing');
+  }
+}
+
+// 下一首（随机）
+function nextSong() {
+  playSong(getRandomSong());
+}
+
+// 歌曲结束自动播放下一首
+audio.addEventListener('ended', () => {
+  nextSong();
+});
+
+// 播放出错自动跳过
+audio.addEventListener('error', () => {
+  console.log('加载失败，尝试下一首...');
+  nextSong();
+});
+</script>
+
+</body>
+</html>

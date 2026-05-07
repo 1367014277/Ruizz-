@@ -1,0 +1,3691 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+<title>&#x1D4E1;&#x1D4FE;&#x1D4F2;&#x1D503;&#x1D503; &#x5BFC;&#x822A;</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { min-width: 820px; overflow-x: auto; }
+
+:root {
+  --card-opacity: 0.18;
+  --card-blur: 12px;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --accent: #4a90e2;
+  --bg-overlay: rgba(0,0,0,0.22);
+  --search-opacity: 0.75;
+  --nav-item-color: rgba(255,255,255,0.93);
+  --nav-item-color2: rgba(255,255,255,0.93);
+  --nav-item-gradient: none;
+}
+
+body {
+  font-family: var(--font-family);
+  min-height: 100vh;
+  min-width: 820px;
+  background: #1a1a2e;
+  overflow-y: auto;
+  overflow-x: auto;
+  user-select: none;
+}
+
+/* ===== 隐藏滚动条，但保留滚轮滚动 ===== */
+body::-webkit-scrollbar { width: 0; }
+* { scrollbar-width: none; }
+
+/* ===== 背景 ===== */
+#bg {
+  position: fixed; inset: 0;
+  background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80') center/cover no-repeat;
+  z-index: 0; transition: background-image 0.5s;
+}
+#bg-overlay {
+  position: fixed; inset: 0;
+  background: var(--bg-overlay);
+  z-index: 0; transition: background 0.3s;
+}
+
+/* ===== 三栏布局：左栏 | 中内容 | 右栏 ===== */
+.wrap {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: 210px 1fr 210px;
+  min-height: 100vh;
+  padding: 20px;
+  gap: 16px;
+  min-width: 820px;
+}
+
+/* ===== 毛玻璃卡片 ===== */
+.card {
+  background: rgba(255,255,255,var(--card-opacity));
+  backdrop-filter: blur(var(--card-blur));
+  -webkit-backdrop-filter: blur(var(--card-blur));
+  border-radius: 14px;
+  padding: 14px 16px;
+  color: white;
+  border: 1px solid rgba(255,255,255,0.22);
+  transition: background 0.3s;
+}
+
+/* ===== 左侧栏 ===== */
+.sidebar { display:flex; flex-direction:column; gap:12px; padding-top:20px; position:relative; }
+#sidebar-widgets { display:flex; flex-direction:column; gap:12px; }
+
+/* ===== 左侧天气问候卡片 ===== */
+.weather-greeting {
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: background 0.25s, transform 0.2s;
+  overflow: hidden;
+}
+.weather-greeting:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.12) 100%);
+  transform: translateY(-1px);
+}
+.weather-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.92);
+}
+.weather-icon {
+  font-size: 26px;
+  line-height: 1;
+  margin-right: 2px;
+}
+.weather-temp {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.weather-dot {
+  opacity: 0.4;
+  margin: 0 1px;
+}
+.weather-city {
+  opacity: 0.65;
+  font-size: 12px;
+  flex:1;
+  text-align:right;
+}
+.weather-greeting-text {
+  font-size: 12px;
+  color: rgba(255,255,255,0.78);
+  letter-spacing: 0.3px;
+  padding-top:4px;
+  border-top:1px solid rgba(255,255,255,0.1);
+}
+
+.clock-time {
+  font-size: 48px; font-weight: 200; letter-spacing: 3px; line-height: 1;
+  text-align:center; padding:6px 0 4px;
+}
+.clock-time .sec {
+  font-size: 24px; opacity: 0.6; vertical-align: top; margin-top: 8px; display: inline-block;
+}
+.clock-date { font-size: 13px; opacity: 0.82; }
+.clock-sub { text-align:center; margin-top: 6px; display:flex; justify-content:center; gap:8px; }
+.clock-weekday { font-size: 13px; opacity: 0.65; font-weight:400; }
+.clock-lunar { font-size: 12px; opacity: 0.6; text-align:center; margin-top: 4px; }
+
+.cal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px; font-size: 13px;
+}
+.cal-nav {
+  background: none; border: none; color: white;
+  cursor: pointer; font-size: 13px; padding: 0 4px; opacity: 0.8;
+}
+.cal-nav:hover { opacity:1; }
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  gap: 2px; text-align: center; font-size: 12px;
+}
+.day-name { opacity:0.55; padding:2px 0 4px; font-size:11px; }
+.day { padding: 3px 0; border-radius: 50%; cursor: pointer; opacity: 0.75; line-height: 1.7; }
+.day:hover { background:rgba(255,255,255,0.2); opacity:1; }
+.day.today { background: var(--accent); opacity:1; font-weight:600; border-radius:50%; }
+.day.other-month { opacity:0.28; }
+
+.countdown-title {
+  font-size:13px; font-weight:500; margin-bottom:8px; opacity:0.9;
+  display:flex; align-items:center; gap:5px;
+}
+.countdown-title::before {
+  content:''; display:inline-block; width:3px; height:13px;
+  background: var(--accent); border-radius:2px;
+}
+.countdown-item {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:4px 0; font-size:13px; border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.countdown-item:last-child { border-bottom:none; }
+.countdown-item .label { opacity:0.8; }
+.countdown-item .days { font-size:12px; color:#a8d8ea; }
+
+.yiyan-text { font-size:13px; line-height:1.75; opacity:0.88; }
+.yiyan-from { font-size:12px; opacity:0.5; margin-top:6px; text-align:right; }
+.yiyan-more {
+  background:none; border:none; color:#7ec8e3; font-size:12px;
+  cursor:pointer; padding:0; margin-top:5px; text-decoration:underline;
+}
+
+/* ===== 右侧小组件栏 ===== */
+.right-sidebar { display:flex; flex-direction:column; gap:12px; padding-top:80px; position:relative; }
+.widget-placeholder {
+  font-size:12px; opacity:0.4; text-align:center; padding:20px 0;
+}
+
+/* 头像 */
+.profile { display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:12px; }
+.avatar-ring {
+  width: 120px; height: 120px; border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.88); overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.25), 0 4px 20px rgba(0,0,0,0.4);
+}
+.avatar-ring img { width: 100%; height: 100%; object-fit: cover; display:block; }
+.profile-name {
+  color: white; font-size: 32px;
+  font-family: 'Brush Script MT','Segoe Script',cursive;
+  font-style: italic; letter-spacing: 2px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+/* ===== 搜索框（仿参考图样式） ===== */
+.search-wrap { width:100%; max-width:620px; min-width:320px; position:relative; }
+.search-tabs {
+  display:flex; gap:0; margin-bottom:0;
+  border-radius:12px 12px 0 0; overflow:hidden;
+  background: rgba(0,0,0,0.15);
+  padding: 6px 10px 0;
+  gap: 4px;
+}
+.search-tab {
+  padding: 5px 14px; font-size:13px; color:rgba(255,255,255,0.6);
+  border-radius:6px 6px 0 0; cursor:pointer; border:none;
+  background:transparent; font-family:var(--font-family);
+  transition: all 0.15s; border-bottom: 2px solid transparent;
+}
+.search-tab.active { color:white; background:rgba(255,255,255,0.12); border-bottom-color:var(--accent); }
+.search-tab:hover { color:white; }
+
+.search-bar {
+  display:flex; align-items:center;
+  position: relative;
+  z-index: 100;
+  background: rgba(255,255,255,var(--search-opacity));
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-radius: 999px;
+  width: 100%;
+  min-width:320px;
+  overflow: visible;
+  border: 1px solid rgba(255,255,255,0.5);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  transition: background 0.3s;
+}
+.search-input {
+  flex:1; border:none; outline:none;
+  padding: 13px 18px; font-size: 15px;
+  background: transparent; color: #222;
+  font-family: var(--font-family);
+}
+.search-input::placeholder { color: rgba(0,0,0,0.38); }
+.search-btn {
+  background:transparent; border:none; padding:0 14px; height:46px;
+  cursor:pointer; transition:opacity 0.15s; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.search-btn:hover { opacity:0.6; }
+
+/* 搜索操作区（引擎+搜索图标，整体融入胶囊） */
+.search-actions {
+  display:flex; align-items:center;
+  border-left:1px solid rgba(200,200,200,0.35);
+  height:46px; flex-shrink:0;
+}
+
+/* 搜索建议/历史下拉（毛玻璃效果，在搜索框正下方） */
+.search-suggestions {
+  display:none; position:absolute; top:54px; left:0; right:0;
+  background:rgba(255,255,255,var(--search-opacity)); 
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  border-radius:10px; padding:6px 0;
+  box-shadow:0 8px 30px rgba(0,0,0,0.18); z-index:9999;
+  border:1px solid rgba(255,255,255,0.3);
+  max-height:280px; overflow-y:auto;
+}
+.search-suggestions.show { display:block; }
+.suggestion-item {
+  padding:10px 16px; cursor:pointer; display:flex; align-items:center;
+  color:#333; font-size:14px; transition:background 0.12s;
+}
+.suggestion-item:hover { background:rgba(74,144,226,0.12); }
+.suggestion-item svg { width:16px; height:16px; margin-right:10px; opacity:0.5; flex-shrink:0; }
+.suggestion-item.history-item { color:#333; }
+.suggestion-item.delete-btn { color:#e74c3c; margin-left:auto; padding:10px 12px; }
+.suggestion-item.delete-btn:hover { background:rgba(231,76,60,0.1); }
+.suggest-title { padding:8px 16px 4px; font-size:11px; color:#666; text-transform:uppercase; letter-spacing:0.5px; }
+
+/* 搜索引擎按钮 */
+.engine-btn {
+  background:transparent; border:none;
+  padding:0 10px; height:100%;
+  font-size:13px; color:#555; cursor:pointer;
+  font-family:var(--font-family);
+  display:flex; align-items:center; gap:4px;
+  transition:background 0.2s;
+}
+.engine-btn:hover { background:rgba(0,0,0,0.05); }
+
+/* 搜索引擎下拉菜单（body 级别，永远在最顶层，毛玻璃效果） */
+.engine-menu {
+  display:none; position:fixed; 
+  background:rgba(255,255,255,var(--search-opacity)); 
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-radius:10px; padding:6px 0;
+  box-shadow:0 8px 30px rgba(0,0,0,0.18); z-index:9999; min-width:120px;
+  border:1px solid rgba(255,255,255,0.3);
+}
+.engine-menu.show { display:block; }
+.engine-option {
+  padding:9px 18px; font-size:14px; color:#333; cursor:pointer; transition:background 0.15s;
+}
+.engine-option:hover { background:rgba(74,144,226,0.15); color:var(--accent); }
+
+/* ===== 导航分类 ===== */
+.nav-grid {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:24px; width:100%; max-width:980px; padding-bottom:24px;
+}
+.nav-section-title {
+  color:rgba(255,255,255,0.92); font-size:15px; font-weight:500;
+  margin-bottom:11px; padding-left:2px; letter-spacing:1px; cursor:default;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.nav-items { display:grid; grid-template-columns:repeat(3,1fr); gap:11px; }
+.nav-item {
+  display:block; text-align:center; padding:12px 6px;
+  background:rgba(255,255,255,var(--card-opacity));
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.2); border-radius:10px;
+  color: var(--nav-item-color);
+  font-size:14px; text-decoration:none;
+  transition:background 0.18s, transform 0.15s; cursor:pointer;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.nav-item:hover { background:rgba(255,255,255,0.32); transform:translateY(-2px); }
+
+/* ===== 中间主区域 ===== */
+.main {
+  position: relative;
+  width: 100%;
+  display:flex; flex-direction:column; align-items:center; gap:22px;
+  overflow-x:auto; min-width:320px;
+}
+
+/* ===== 导航大全按钮 ===== */
+.nav-all-btn {
+  background:rgba(255,255,255,var(--card-opacity)); backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.2);
+  border-radius:10px; padding:10px 16px;
+  color:rgba(255,255,255,0.93); font-size:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background 0.18s, transform 0.15s;
+}
+.nav-all-btn:hover { background:rgba(255,255,255,0.32); transform:translateY(-2px); }
+  border-radius:20px; padding:0 14px; height:38px;
+  color:white; font-size:13px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background 0.2s, transform 0.2s;
+}
+.nav-all-btn:hover { background:rgba(255,255,255,0.32); transform:scale(1.05); }
+
+/* ===== 设置按钮 ===== */
+.settings-btn {
+  background:rgba(255,255,255,0.18); backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.3);
+  border-radius:50%; width:38px; height:38px;
+  color:white; font-size:18px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background 0.2s, transform 0.3s;
+}
+.settings-btn:hover { background:rgba(255,255,255,0.32); transform:rotate(45deg); }
+
+/* ===== 设置面板（右侧中间弹出） ===== */
+.settings-drawer {
+  position: fixed; top: 50%; right: -420px;
+  transform: translateY(-50%);
+  width: 380px; height: 65vh;
+  z-index: 250;
+  background: rgba(20,22,40,0.85);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+  transition: right 0.32s cubic-bezier(0.4,0,0.2,1);
+  overflow-y: auto; padding: 24px 24px 32px;
+  color: white;
+}
+.settings-drawer.open { right: 20px; }
+
+.settings-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom: 20px; padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.settings-header h2 { font-size:16px; font-weight:500; }
+.settings-close {
+  background:none; border:none; color:rgba(255,255,255,0.55);
+  font-size:22px; cursor:pointer; line-height:1; padding:0;
+}
+.settings-close:hover { color:white; }
+
+.settings-tabs {
+  display:flex; gap:5px; margin-bottom:18px; flex-wrap:wrap;
+}
+.tab-btn {
+  background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.13);
+  border-radius:7px; color:rgba(255,255,255,0.7); font-size:12px;
+  padding:5px 11px; cursor:pointer; transition:all 0.15s;
+  font-family:var(--font-family);
+}
+.tab-btn:hover { background:rgba(255,255,255,0.16); color:white; }
+.tab-btn.active { background:var(--accent); border-color:var(--accent); color:white; }
+
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
+.setting-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.07); gap:12px;
+}
+.setting-row:last-child { border-bottom:none; }
+.setting-label { font-size:13px; opacity:0.85; min-width:80px; }
+.setting-desc { font-size:11px; opacity:0.45; margin-top:2px; }
+.section-title { font-size:13px; font-weight:600; opacity:0.9; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.1); cursor:pointer; user-select:none; display:flex; align-items:center; justify-content:space-between; }
+.section-title::after { content:'▾'; font-size:10px; opacity:0.5; transition:transform 0.2s; }
+.section-title.collapsed::after { transform:rotate(-90deg); }
+.section-body { display:block; }
+
+input[type=range] {
+  -webkit-appearance:none; appearance:none;
+  width:130px; height:4px; border-radius:4px;
+  background: rgba(255,255,255,0.2); outline:none; cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none; width:14px; height:14px; border-radius:50%;
+  background:var(--accent); cursor:pointer;
+}
+input[type=range].full { width:100%; }
+.range-val { font-size:12px; color:var(--accent); min-width:34px; text-align:right; }
+
+/* ===== 搜索框样式 ===== */
+.sbar-card { border-radius:14px !important; box-shadow:none !important; border-color:rgba(255,255,255,0.3) !important; }
+.sbar-minimal { border-radius:8px !important; border-color:rgba(255,255,255,0.4) !important; box-shadow:none !important; background:transparent !important; }
+.sbar-glass { border-radius:999px !important; border-color:rgba(255,255,255,0.6) !important; box-shadow:0 6px 30px rgba(0,0,0,0.3) !important; }
+.sbar-modern { border-radius:6px !important; box-shadow:none !important; border-color:rgba(255,255,255,0.25) !important; }
+/* 样式选择网格 */
+.sbar-grid .bg-thumb { height:44px; }
+
+/* 主题色点 */
+.theme-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; margin-top:7px; }
+.theme-dot {
+  width:32px; height:32px; border-radius:50%; cursor:pointer;
+  border:2px solid transparent; transition:transform 0.15s, border-color 0.15s;
+}
+.theme-dot:hover { transform:scale(1.12); }
+.theme-dot.active { border-color:white; }
+
+/* 背景缩略 */
+.bg-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:7px; }
+.bg-thumb {
+  height:56px; border-radius:7px; background:center/cover;
+  cursor:pointer; border:2px solid transparent; transition:all 0.15s; overflow:hidden;
+}
+.bg-thumb:hover { transform:scale(1.04); }
+.bg-thumb.active { border-color:white; }
+
+/* 字体列表（网格布局，更紧凑） */
+.font-list { display:grid; grid-template-columns:repeat(2,1fr); gap:7px; margin-top:5px; }
+.font-item {
+  padding:7px 10px; border-radius:8px;
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+  cursor:pointer; transition:all 0.15s; font-size:13px;
+}
+.font-item:hover { background:rgba(255,255,255,0.12); }
+.font-item.active { background:rgba(74,144,226,0.25); border-color:var(--accent); }
+.font-item span { font-size:10px; opacity:0.5; display:block; margin-top:1px; }
+
+/* 自定义背景输入 */
+.custom-bg-input { display:flex; gap:7px; margin-top:9px; }
+.custom-bg-input input {
+  flex:1; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
+  border-radius:7px; padding:7px 11px; color:white; font-size:12px; outline:none;
+  font-family:var(--font-family);
+}
+.custom-bg-input input::placeholder { color:rgba(255,255,255,0.3); }
+.apply-btn {
+  background:var(--accent); border:none; border-radius:7px;
+  color:white; padding:7px 14px; font-size:12px; cursor:pointer;
+  font-family:var(--font-family); transition:opacity 0.15s; white-space:nowrap;
+}
+.apply-btn:hover { opacity:0.85; }
+.select-local-btn {
+  background:rgba(74,144,226,0.25); border:1px solid rgba(74,144,226,0.5);
+  cursor:pointer;
+}
+
+/* 开关 */
+.toggle {
+  width:40px; height:22px; background:rgba(255,255,255,0.2);
+  border-radius:11px; cursor:pointer; position:relative; flex-shrink:0;
+  transition:background 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.toggle.on { background:var(--accent); }
+.toggle::after {
+  content:''; position:absolute; top:3px; left:3px;
+  width:16px; height:16px; border-radius:50%; background:white;
+  transition:left 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.toggle.on::after { left:21px; }
+
+/* checkbox方式的开关（小组件设置用） */
+.toggle input[type=checkbox] { display:none; }
+.toggle .slider {
+  position:absolute; top:3px; left:3px;
+  width:16px; height:16px; border-radius:50%; background:white;
+  transition:left 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.toggle input[type=checkbox]:checked ~ .slider { left:21px; }
+.toggle:has(input[type=checkbox]:checked) { background:var(--accent); }
+.toggle.checkbox-style { overflow:hidden; }
+.toggle.checkbox-style::after { display:none; }
+
+/* 小组件拖动排序 */
+.widget-order-list { display:flex; flex-direction:column; gap:6px; }
+.widget-order-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:8px;
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+  cursor:grab; transition:opacity 0.15s, background 0.15s;
+  user-select:none; position:relative;
+}
+.widget-order-item:hover { background:rgba(255,255,255,0.1); }
+.widget-order-item.is-dragging {
+  opacity:0.35;
+}
+.widget-order-item.insert-before::before {
+  content:''; position:absolute; top:-4px; left:8px; right:8px; height:3px;
+  background:var(--accent); border-radius:2px;
+}
+.widget-order-item.insert-after::after {
+  content:''; position:absolute; bottom:-4px; left:8px; right:8px; height:3px;
+  background:var(--accent); border-radius:2px;
+}
+.drag-placeholder {
+  height:0; border-radius:8px; flex-shrink:0; overflow:hidden;
+  transition:height 0.15s;
+}
+.drag-placeholder.active { height:52px; }
+.drag-handle { color:rgba(255,255,255,0.35); font-size:14px; cursor:grab; flex-shrink:0; }
+.drag-handle:active { cursor:grabbing; }
+.widget-name { flex:1; font-size:13px; }
+
+/* 今日热搜小组件 */
+.widget-hotsearch-card {
+  transition: box-shadow 0.2s;
+}
+.widget-hotsearch-card:hover { box-shadow:0 6px 24px rgba(0,0,0,0.18); }
+.widget-hotsearch-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:12px;
+}
+.widget-hotsearch-title { font-size:14px; font-weight:600; display:flex; gap:8px; }
+.title-tab {
+  cursor:pointer; opacity:0.5; transition:all 0.2s;
+  padding:2px 6px; border-radius:6px;
+}
+.title-tab:hover { opacity:0.8; background:rgba(255,255,255,0.08); }
+.title-tab.active { opacity:1; color:var(--accent); }
+.widget-hotsearch-refresh {
+  background:none; border:none; color:var(--text);
+  font-size:18px; cursor:pointer; padding:2px 6px;
+  border-radius:6px; transition:background 0.15s;
+}
+.widget-hotsearch-refresh:hover { background:rgba(255,255,255,0.1); }
+.widget-hotsearch-tabs {
+  display:flex; gap:6px; margin-bottom:12px;
+  padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.hotsearch-tab {
+  flex:1; padding:6px 8px; border:none; border-radius:6px;
+  background:rgba(255,255,255,0.06); color:var(--text);
+  font-size:12px; cursor:pointer; transition:all 0.2s;
+}
+.hotsearch-tab:hover { background:rgba(255,255,255,0.12); }
+.hotsearch-tab.active {
+  background:var(--accent); color:white; font-weight:600;
+}
+.widget-hotsearch-body { max-height:400px; overflow-y:auto; } }
+.widget-hotsearch-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:12px;
+}
+.widget-hotsearch-title { font-size:14px; font-weight:600; }
+.widget-hotsearch-refresh {
+  background:none; border:none; color:var(--text);
+  font-size:18px; cursor:pointer; padding:2px 6px;
+  border-radius:6px; transition:background 0.15s;
+}
+.widget-hotsearch-refresh:hover { background:rgba(255,255,255,0.1); }
+.widget-hotsearch-tabs {
+  display:flex; gap:6px; margin-bottom:12px;
+  padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.hotsearch-tab {
+  flex:1; padding:6px 8px; border:none; border-radius:6px;
+  background:rgba(255,255,255,0.06); color:var(--text);
+  font-size:12px; cursor:pointer; transition:all 0.2s;
+}
+.hotsearch-tab:hover { background:rgba(255,255,255,0.12); }
+.hotsearch-tab.active {
+  background:var(--accent); color:white; font-weight:600;
+}
+.widget-hotsearch-body { max-height:400px; overflow-y:auto; }
+.widget-hotsearch-loading { font-size:12px; opacity:0.5; text-align:center; padding:20px 0; }
+.hotsearch-item {
+  display:flex; align-items:center; gap:10px;
+  padding:8px 6px; border-radius:8px; cursor:pointer;
+  transition:background 0.15s;
+}
+.hotsearch-item:hover { background:rgba(255,255,255,0.08); }
+.hotsearch-rank {
+  font-size:12px; font-weight:700; min-width:20px; text-align:center;
+  color:var(--accent);
+}
+.hotsearch-rank.top3 { color:#ff6b6b; }
+.hotsearch-text { flex:1; font-size:13px; line-height:1.4; }
+.hotsearch-hot { font-size:11px; opacity:0.4; }
+
+/* 颜色选择器行 */
+.color-row { display:flex; align-items:center; gap:10px; margin-top:6px; }
+.color-swatch {
+  width:40px; height:40px; border-radius:50%; border:2px solid rgba(255,255,255,0.3);
+  cursor:pointer; flex-shrink:0; overflow:hidden; position:relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.color-swatch input[type=color] {
+  position:absolute; inset:-4px; width:calc(100%+8px); height:calc(100%+8px);
+  opacity:0; cursor:pointer; border:none; padding:0;
+}
+.gradient-presets { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.grad-dot {
+  width:32px; height:32px; border-radius:50%; cursor:pointer;
+  border:2px solid rgba(255,255,255,0.35); transition:transform 0.15s, border-color 0.15s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  overflow:hidden; position:relative;
+}
+.grad-dot::before {
+  content:''; position:absolute; top:0; left:0; right:50%; bottom:0;
+  background:var(--dot-color1, #ffffff);
+}
+.grad-dot:hover { transform:scale(1.12); }
+.grad-dot.active { border-color:white; box-shadow: 0 0 0 2px rgba(255,255,255,0.5), 0 2px 6px rgba(0,0,0,0.25); }
+
+/* 重置按钮 */
+.reset-btn {
+  width:100%; padding:9px; border-radius:8px;
+  background:rgba(231,76,60,0.18); border:1px solid rgba(231,76,60,0.4);
+  color:rgba(255,100,80,0.9); font-size:13px; cursor:pointer;
+  font-family:var(--font-family); transition:all 0.15s; margin-top:4px;
+}
+.reset-btn:hover { background:rgba(231,76,60,0.32); color:white; }
+.reset-btn.safe {
+  background:rgba(74,144,226,0.15); border-color:rgba(74,144,226,0.4);
+  color:rgba(120,180,255,0.9);
+}
+.reset-btn.safe:hover { background:rgba(74,144,226,0.3); color:white; }
+
+/* ===== 右键菜单 ===== */
+.ctx-menu {
+  position: fixed; z-index: 999;
+  background: rgba(30,32,50,0.96);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 10px;
+  padding: 4px 0; min-width: 180px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4); display: none;
+}
+.ctx-menu.show { display:block; }
+.ctx-item {
+  padding: 7px 14px 7px 32px; font-size: 13px;
+  color: rgba(255,255,255,0.88); cursor: pointer;
+  transition: background 0.1s; position: relative; white-space: nowrap;
+}
+.ctx-item:hover { background: rgba(74,144,226,0.35); color: white; }
+.ctx-item.danger:hover { background: rgba(231,76,60,0.35); }
+.ctx-sep { height: 1px; background: rgba(255,255,255,0.08); margin: 3px 0; }
+.ctx-item.submenu::after {
+  content: '&#9658;'; position: absolute; right: 12px; font-size: 10px;
+  top: 50%; transform: translateY(-50%); opacity: 0.4;
+}
+.ctx-sub {
+  position: absolute; left: 100%; top: -4px;
+  background: rgba(30,32,50,0.96); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px; padding: 4px 0; min-width: 160px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4); display: none;
+}
+.ctx-item.submenu:hover .ctx-sub { display: block; }
+.ctx-sub .ctx-item { padding-left: 14px; }
+
+/* ===== 弹窗 ===== */
+.modal-overlay {
+  position: fixed; inset:0; background:rgba(0,0,0,0.5);
+  z-index: 400; display:none; align-items:center; justify-content:center;
+}
+.modal-overlay.show { display:flex; }
+.modal-box {
+  background: rgba(30,34,55,0.97); backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 14px;
+  padding: 24px 28px; width: 380px; max-width: 92vw; color: white;
+}
+.modal-title { font-size:16px; font-weight:500; margin-bottom:16px; }
+.modal-label { font-size:13px; opacity:0.7; margin-bottom:5px; }
+.modal-input {
+  width:100%; padding:9px 12px; border-radius:8px;
+  background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18);
+  color:white; font-size:14px; outline:none; font-family:var(--font-family);
+  margin-bottom:14px;
+}
+.modal-input:focus { border-color:var(--accent); }
+.modal-btns { display:flex; gap:8px; justify-content:flex-end; }
+.modal-btn {
+  padding:7px 18px; border-radius:8px; font-size:13px;
+  border:none; cursor:pointer; font-family:var(--font-family); transition:opacity 0.15s;
+}
+.modal-btn.primary { background:var(--accent); color:white; }
+.modal-btn.cancel { background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.7); }
+.modal-btn:hover { opacity:0.85; }
+
+/* ===== 音乐播放器小组件 ===== */
+.widget-player-title {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.widget-player-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.player-mode {
+  font-size: 11px; padding: 2px 10px; border-radius: 10px;
+  cursor: pointer; transition: all 0.2s;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  user-select: none;
+}
+.player-mode.active {
+  background: var(--accent); border-color: var(--accent);
+  color: white;
+}
+.player-mode:not(.active):hover {
+  background: rgba(255,255,255,0.18);
+}
+.widget-player-song {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.widget-player-artist {
+  font-size: 11px;
+  opacity: 0.6;
+  margin-bottom: 10px;
+}
+.widget-player-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.widget-player-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  opacity: 0.8;
+  transition: all 0.2s;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.widget-player-btn:hover {
+  background: rgba(74,144,226,0.2);
+  opacity: 1;
+}
+.widget-player-btn.play {
+  font-size: 18px;
+  background: rgba(74,144,226,0.2);
+  border: 1px solid rgba(74,144,226,0.3);
+  width: 40px;
+  height: 40px;
+}
+
+.widget-player-btn:hover {
+  background: rgba(74,144,226,0.15);
+  opacity: 1;
+}
+
+.widget-player-progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.widget-player-time {
+  font-size: 10px;
+  opacity: 0.5;
+  min-width: 28px;
+  text-align: center;
+}
+.widget-player-progress input {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(74,144,226,0.25);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.widget-player-progress input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(74,144,226,0.5);
+}
+.widget-player-loading {
+  font-size: 10px;
+  text-align: center;
+  opacity: 0.5;
+  margin-top: 4px;
+}
+
+/* ===== 播放器卡片新布局 ===== */
+.widget-player-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.widget-player-header {
+  display: flex;
+  align-items: center;
+}
+.widget-player-body {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding-top: 4px;
+}
+.widget-player-info {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ===== 右侧竖向音量控制 ===== */
+.widget-volume-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  padding: 2px 4px;
+  opacity: 0.85;
+  margin-top: -2px;
+}
+.widget-volume-vertical span {
+  cursor: pointer;
+}
+/* 旋转容器 - 让水平滑块看起来是竖向的 */
+.volume-slider-wrap {
+  width: 14px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+.volume-slider-wrap input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 52px;
+  height: 4px;
+  background: rgba(74,144,226,0.25);
+  border-radius: 2px;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transform: rotate(90deg);
+  transform-origin: center center;
+  direction: rtl;
+}
+/* Webkit 滑块圆点 - 居中 */
+.volume-slider-wrap input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 0 6px var(--accent);
+  margin-left: -3px;
+}
+/* Firefox */
+.volume-slider-wrap input::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 6px var(--accent);
+}
+.volume-slider-wrap input::-moz-range-track {
+  background: rgba(74,144,226,0.25);
+  border-radius: 2px;
+  border: none;
+}
+
+</style>
+</head>
+<body>
+
+<div id="bg"></div>
+<div id="bg-overlay"></div>
+
+<!-- 搜索引擎下拉菜单（body 级别，永远在最顶层） -->
+<div class="engine-menu" id="engine-menu">
+  <div class="engine-option" onclick="selectEngine('baidu','百度')">百度</div>
+  <div class="engine-option" onclick="selectEngine('google','Google')">Google</div>
+  <div class="engine-option" onclick="selectEngine('bing','Bing')">Bing</div>
+  <div class="engine-option" onclick="selectEngine('bilibili','B站')">B站</div>
+  <div class="engine-option" onclick="selectEngine('zhihu','知乎')">知乎</div>
+</div>
+
+<!-- 右键菜单：分类 -->
+<div class="ctx-menu" id="ctx-section">
+  <div class="ctx-item" onclick="ctxRenameSection()">&#9999; 重命名</div>
+  <div class="ctx-item" onclick="ctxAddItem()">&#10133; 添加导航</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item submenu">&#128194; 迁移至...
+    <div class="ctx-sub" id="ctx-moveTo-section"></div>
+  </div>
+  <div class="ctx-item" onclick="ctxMoveSectionUp()">&#11014; 上移</div>
+  <div class="ctx-item" onclick="ctxMoveSectionDown()">&#11015; 下移</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxAddSection()">&#128196; 添加分类</div>
+  <div class="ctx-item danger" onclick="ctxDeleteSection()">&#128465; 删除分类</div>
+</div>
+
+<!-- 右键菜单：导航卡片 -->
+<div class="ctx-menu" id="ctx-item-menu">
+  <div class="ctx-item" onclick="ctxEditItemName()">&#9999; 编辑名称</div>
+  <div class="ctx-item" onclick="ctxEditItemUrl()">&#128279; 编辑链接</div>
+  <div class="ctx-item" onclick="ctxAddItemHere()">&#10133; 在此添加</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item submenu">&#128194; 迁移至...
+    <div class="ctx-sub" id="ctx-moveTo-item"></div>
+  </div>
+  <div class="ctx-item" onclick="ctxMoveItemLeft()">&#11013; 左移</div>
+  <div class="ctx-item" onclick="ctxMoveItemRight()">&#10145; 右移</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" onclick="ctxDeleteItem()">&#128465; 删除</div>
+</div>
+
+<!-- 弹窗 -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">提示</div>
+    <div class="modal-label" id="modal-label"></div>
+    <input class="modal-input" id="modal-input" type="text" placeholder="" />
+    <div class="modal-btns">
+      <button class="modal-btn cancel" onclick="closeModal()">取消</button>
+      <button class="modal-btn primary" onclick="modalOk()">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 设置抽屉（右侧滑入） -->
+<div class="settings-drawer" id="settings-drawer">
+  <div class="settings-header">
+    <h2>&#9881; 个性化设置</h2>
+    <button class="settings-close" onclick="closeSettings()">&#215;</button>
+  </div>
+
+  <div class="settings-tabs">
+    <button class="tab-btn active" onclick="switchTab('appearance')">外观设置</button>
+    <button class="tab-btn" onclick="switchTab('widget')">小组件设置</button>
+    <button class="tab-btn" onclick="switchTab('fontcolor')">字体与颜色</button>
+    <button class="tab-btn" onclick="switchTab('other')">其他设置</button>
+  </div>
+
+  <!-- 外观设置 -->
+  <div class="tab-content active" id="tab-appearance">
+    <div class="section-title collapsed" onclick="toggleSection(this)">🎨 背景设置</div>
+    <div class="section-body" style="display:none;">
+    <div style="font-size:12px;opacity:0.55;margin-bottom:6px;">预设背景</div>
+    <div class="bg-grid">
+      <div class="bg-thumb active" style="background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=60')" onclick="setBg('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80',this)"></div>
+      <div class="bg-thumb" style="background-image:url('https://cdn.pixabay.com/photo/2016/02/27/06/43/cherry-blossom-tree-1225186_1280.jpg')" onclick="setBg('https://cdn.pixabay.com/photo/2016/02/27/06/43/cherry-blossom-tree-1225186_1280.jpg',this)"></div>
+      <div class="bg-thumb" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&q=60')" onclick="setBg('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80',this)"></div>
+      <div class="bg-thumb" style="background-image:url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=400&q=60')" onclick="setBg('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1920&q=80',this)"></div>
+      <div class="bg-thumb" style="background-image:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&q=60')" onclick="setBg('https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1920&q=80',this)"></div>
+      <div class="bg-thumb" style="background-image:url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&q=60')" onclick="setBg('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&q=80',this)"></div>
+    </div>
+    <div style="font-size:12px;opacity:0.55;margin-top:12px;margin-bottom:4px;">自定义背景 URL</div>
+    <div class="custom-bg-input">
+      <input type="text" id="custom-bg-url" placeholder="粘贴图片链接…" />
+      <label class="apply-btn select-local-btn" onclick="document.getElementById('local-bg-file').click()">选择</label>
+      <button class="apply-btn" onclick="applyCustomBg()">应用</button>
+      <input type="file" id="local-bg-file" accept="image/*" style="display:none" onchange="handleLocalBg(this)">
+    </div>
+    <div style="font-size:12px;opacity:0.55;margin-top:14px;margin-bottom:6px;">纯色背景</div>
+    <div class="bg-grid" style="grid-template-columns:repeat(3,1fr);gap:7px;">
+      <div class="bg-thumb" style="background:#1a1a2e;border:2px solid rgba(255,255,255,0.3);" onclick="setSolidBg('#1a1a2e',this)" title="深蓝黑"></div>
+      <div class="bg-thumb" style="background:#C7EDCC;border:2px solid rgba(255,255,255,0.3);" onclick="setSolidBg('#C7EDCC',this)" title="护眼绿"></div>
+      <div class="bg-thumb" style="background:#F5F0EB;border:2px solid rgba(255,255,255,0.3);" onclick="setSolidBg('#F5F0EB',this)" title="柔和米白"></div>
+      <div class="bg-thumb" style="background:#D6E0EA;border:2px solid rgba(255,255,255,0.3);" onclick="setSolidBg('#D6E0EA',this)" title="浅灰蓝"></div>
+      <div class="bg-thumb" style="background:#EAE4DA;border:2px solid rgba(255,255,255,0.3);" onclick="setSolidBg('#EAE4DA',this)" title="暖灰"></div>
+      <div class="bg-thumb" style="background:#E8DFF0;border:2px solid rgba(255,255,255,0.3);" onclick="setSolidBg('#E8DFF0',this)" title="淡紫"></div>
+      <div class="bg-thumb" style="background:#2C3E50;border:2px solid rgba(255,255,255,0.3);" onclick="setSolidBg('#2C3E50',this)" title="深蓝灰"></div>
+      <div class="bg-thumb" style="background:#0a0a14;border:2px solid rgba(255,255,255,0.3);" onclick="setSolidBg('#0a0a14',this)" title="极夜黑"></div>
+      <div class="bg-thumb" style="background:#FDF6E3;border:2px solid rgba(255,255,255,0.3);" onclick="setSolidBg('#FDF6E3',this)" title="暖白"></div>
+    </div>
+    <div class="setting-row" style="margin-top:8px;">
+      <div><div class="setting-label">背景遮罩</div><div class="setting-desc">暗化程度</div></div>
+      <div style="display:flex;align-items:center;gap:7px;">
+        <input type="range" min="0" max="80" value="22" id="overlay-range" oninput="setOverlay(this.value)">
+        <span class="range-val" id="overlay-val">22%</span>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">背景亮度</div><div class="setting-desc">调亮/调暗</div></div>
+      <div style="display:flex;align-items:center;gap:7px;">
+        <input type="range" min="50" max="150" value="100" id="brightness-range" oninput="setBrightness(this.value)">
+        <span class="range-val" id="brightness-val">100%</span>
+      </div>
+    </div>
+    </div><!-- /section-body -->
+
+    <div class="section-title collapsed" style="margin-top:18px;" onclick="toggleSection(this)">🎨 主题设置</div>
+    <div class="section-body" style="display:none;">
+    <div style="font-size:12px;opacity:0.55;margin-bottom:6px;">主题强调色</div>
+    <div class="theme-grid">
+      <div class="theme-dot active" style="background:#4a90e2" onclick="setAccent('#4a90e2',this)" title="海蓝"></div>
+      <div class="theme-dot" style="background:#e74c8b" onclick="setAccent('#e74c8b',this)" title="玫粉"></div>
+      <div class="theme-dot" style="background:#27ae60" onclick="setAccent('#27ae60',this)" title="翠绿"></div>
+      <div class="theme-dot" style="background:#f39c12" onclick="setAccent('#f39c12',this)" title="暖橙"></div>
+      <div class="theme-dot" style="background:#9b59b6" onclick="setAccent('#9b59b6',this)" title="紫调"></div>
+      <div class="theme-dot" style="background:#e74c3c" onclick="setAccent('#e74c3c',this)" title="热红"></div>
+      <div class="theme-dot" style="background:#1abc9c" onclick="setAccent('#1abc9c',this)" title="青碧"></div>
+      <div class="theme-dot" style="background:#f0e68c" onclick="setAccent('#f0e68c',this)" title="嫩黄"></div>
+      <div class="theme-dot" style="background:#ffffff" onclick="setAccent('#ffffff',this)" title="纯白"></div>
+      <div class="theme-dot" style="background:linear-gradient(135deg,#667eea,#764ba2)" onclick="setAccent('#7b68ee',this)" title="渐紫"></div>
+    </div>
+    <div class="setting-row" style="margin-top:14px;">
+      <div><div class="setting-label">暗色整体</div><div class="setting-desc">卡片改为深色调</div></div>
+      <div class="toggle" id="dark-toggle" onclick="toggleDark(this)"></div>
+    </div>
+    </div><!-- /section-body -->
+
+    <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:18px;">💧 透明度设置</div>
+    <div class="section-body" style="display:none;">
+    <div class="setting-row">
+      <div><div class="setting-label">小组件透明度</div><div class="setting-desc">侧边栏</div></div>
+      <div style="display:flex;align-items:center;gap:7px;">
+        <input type="range" min="5" max="95" value="18" id="card-opacity-range" oninput="setCardOpacity(this.value)">
+        <span class="range-val" id="card-opacity-val">18%</span>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">搜索框透明度</div></div>
+      <div style="display:flex;align-items:center;gap:7px;">
+        <input type="range" min="10" max="98" value="75" id="search-opacity-range" oninput="setSearchOpacity(this.value)">
+        <span class="range-val" id="search-opacity-val">75%</span>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">导航按钮透明</div></div>
+      <div style="display:flex;align-items:center;gap:7px;">
+        <input type="range" min="5" max="90" value="18" id="nav-opacity-range" oninput="setNavOpacity(this.value)">
+        <span class="range-val" id="nav-opacity-val">18%</span>
+      </div>
+    </div>
+    </div><!-- /section-body -->
+
+    <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:18px;">🔮 毛玻璃设置</div>
+    <div class="section-body" style="display:none;">
+
+    <!-- 小组件毛玻璃 -->
+    <div class="setting-row" style="flex-wrap:wrap;gap:6px;">
+      <div style="display:flex;align-items:center;gap:8px;min-width:110px;">
+        <div class="toggle on" id="blur-widget-toggle" onclick="toggleWidgetBlur(this)"></div>
+        <span style="font-size:13px;opacity:0.85;">小组件</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px;">
+        <input type="range" min="0" max="40" value="12" id="blur-widget-range" oninput="setWidgetBlur(this.value)">
+        <span class="range-val" id="blur-widget-val">12px</span>
+      </div>
+    </div>
+
+    <!-- 搜索框毛玻璃 -->
+    <div class="setting-row" style="flex-wrap:wrap;gap:6px;">
+      <div style="display:flex;align-items:center;gap:8px;min-width:110px;">
+        <div class="toggle on" id="blur-search-toggle" onclick="toggleSearchBlur(this)"></div>
+        <span style="font-size:13px;opacity:0.85;">搜索框</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px;">
+        <input type="range" min="0" max="40" value="16" id="blur-search-range" oninput="setSearchBlur(this.value)">
+        <span class="range-val" id="blur-search-val">16px</span>
+      </div>
+    </div>
+
+    <!-- 导航按钮毛玻璃 -->
+    <div class="setting-row" style="flex-wrap:wrap;gap:6px;">
+      <div style="display:flex;align-items:center;gap:8px;min-width:110px;">
+        <div class="toggle on" id="blur-nav-toggle" onclick="toggleNavBlur(this)"></div>
+        <span style="font-size:13px;opacity:0.85;">导航按钮</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px;">
+        <input type="range" min="0" max="40" value="8" id="blur-nav-range" oninput="setNavBlur(this.value)">
+        <span class="range-val" id="blur-nav-val">8px</span>
+      </div>
+    </div>
+
+    </div><!-- /section-body -->
+
+    <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:18px;">🔍 搜索框样式</div>
+    <div class="section-body" style="display:none;">
+    <div style="font-size:12px;opacity:0.55;margin-bottom:8px;">选择搜索框外观</div>
+    <div class="bg-grid sbar-grid" style="grid-template-columns:repeat(3,1fr);">
+      <div class="bg-thumb search-style active" data-s="pill" onclick="setSbar('pill',this)" style="display:flex;align-items:center;justify-content:center;padding:0 8px;">
+        <span style="flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,0.2);"></span>
+        <span style="font-size:9px;opacity:0.6;">圆润胶囊</span>
+      </div>
+      <div class="bg-thumb search-style" data-s="card" onclick="setSbar('card',this)" style="display:flex;align-items:center;justify-content:center;padding:0 8px;">
+        <span style="flex:1;height:8px;border-radius:3px;background:rgba(255,255,255,0.2);"></span>
+        <span style="font-size:9px;opacity:0.6;">简约卡片</span>
+      </div>
+      <div class="bg-thumb search-style" data-s="minimal" onclick="setSbar('minimal',this)" style="display:flex;align-items:center;justify-content:center;padding:0 8px;">
+        <span style="flex:1;height:7px;border-bottom:1px solid rgba(255,255,255,0.25);"></span>
+        <span style="font-size:9px;opacity:0.6;">极简线条</span>
+      </div>
+      <div class="bg-thumb search-style" data-s="glass" onclick="setSbar('glass',this)" style="display:flex;align-items:center;justify-content:center;padding:0 8px;">
+        <span style="flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,0.25);"></span>
+        <span style="font-size:9px;opacity:0.6;">厚重毛玻璃</span>
+      </div>
+      <div class="bg-thumb search-style" data-s="modern" onclick="setSbar('modern',this)" style="display:flex;align-items:center;justify-content:center;padding:0 8px;">
+        <span style="flex:1;height:8px;background:rgba(255,255,255,0.2);"></span>
+        <span style="font-size:9px;opacity:0.6;">直角现代</span>
+      </div>
+    </div>
+    </div><!-- /section-body -->
+
+  </div><!-- /tab-appearance -->
+
+  <!-- 小组件设置tab -->
+  <div class="tab-content" id="tab-widget">
+    <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:18px;">🧩 小组件设置</div>
+    <div class="section-body" style="display:none;">
+    <div style="font-size:12px;opacity:0.55;margin-bottom:10px;">拖动调整显示顺序</div>
+    <div id="widget-order-list" class="widget-order-list">
+      <div class="widget-order-item" draggable="true" data-widget="weather">
+        <span class="drag-handle">☰</span>
+        <span class="widget-name">天气问候</span>
+        <label class="toggle checkbox-style">
+          <input type="checkbox" id="widget-weather" checked onchange="saveWidgetSetting('weather', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="widget-order-item" draggable="true" data-widget="clock">
+        <span class="drag-handle">☰</span>
+        <span class="widget-name">时钟组件</span>
+        <label class="toggle checkbox-style">
+          <input type="checkbox" id="widget-clock" checked onchange="saveWidgetSetting('clock', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="widget-order-item" draggable="true" data-widget="cal">
+        <span class="drag-handle">☰</span>
+        <span class="widget-name">日历组件</span>
+        <label class="toggle checkbox-style">
+          <input type="checkbox" id="widget-cal" checked onchange="saveWidgetSetting('cal', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="widget-order-item" draggable="true" data-widget="countdown">
+        <span class="drag-handle">☰</span>
+        <span class="widget-name">倒计时</span>
+        <label class="toggle checkbox-style">
+          <input type="checkbox" id="widget-countdown" checked onchange="saveWidgetSetting('countdown', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="widget-order-item" draggable="true" data-widget="yiyan">
+        <span class="drag-handle">☰</span>
+        <span class="widget-name">一言组件</span>
+        <label class="toggle checkbox-style">
+          <input type="checkbox" id="widget-yiyan" checked onchange="saveWidgetSetting('yiyan', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="widget-order-item" data-widget="music" style="opacity:0.75;">
+        <span style="color:rgba(255,255,255,0.25);font-size:14px;flex-shrink:0;">🔒</span>
+        <span class="widget-name">音乐播放器 <span style="opacity:0.4;font-size:11px;">固定</span></span>
+        <label class="toggle checkbox-style">
+          <input type="checkbox" id="widget-music" checked onchange="saveWidgetSetting('music', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="widget-order-item" data-widget="hotsearch" style="opacity:0.75;">
+        <span style="color:rgba(255,255,255,0.25);font-size:14px;flex-shrink:0;">🔒</span>
+        <span class="widget-name">热搜头条 <span style="opacity:0.4;font-size:11px;">固定</span></span>
+        <label class="toggle checkbox-style">
+          <input type="checkbox" id="widget-hotsearch" checked onchange="saveWidgetSetting('hotsearch', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+    </div><!-- /section-body -->
+  </div><!-- /tab-widget -->
+
+  <!-- 字体与颜色设置 -->
+  <div class="tab-content" id="tab-fontcolor">
+    <div class="section-title collapsed" onclick="toggleSection(this)">🎨 导航字色设置</div>
+    <div class="section-body" style="display:none;">
+    <div style="font-size:12px;opacity:0.55;margin-bottom:8px;">导航按钮文字颜色</div>
+    <div class="setting-row">
+      <div><div class="setting-label">单色模式</div><div class="setting-desc">自定义纯色</div></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="color-swatch" id="nav-color-swatch" style="background:rgba(255,255,255,0.93);width:32px;height:32px;">
+          <input type="color" id="nav-color-picker" value="#ffffff">
+        </div>
+        <span style="font-size:12px;opacity:0.6;" id="nav-color-val">#ffffff</span>
+        <button class="apply-btn" style="padding:5px 12px;font-size:11px;" onclick="setNavColor(document.getElementById('nav-color-picker').value)">确定</button>
+      </div>
+    </div>
+    <div style="font-size:12px;opacity:0.55;margin-top:12px;margin-bottom:6px;">渐变色预设</div>
+    <div class="gradient-presets">
+      <div class="grad-dot" style="background:#ffffff;--dot-color1:#ff3366" data-color1="#ff3366" data-color2="#ffffff" onclick="setNavGradientHalf(this, '#ff3366', '#ffffff')" title="粉白"></div>
+      <div class="grad-dot" style="background:#ffffff;--dot-color1:#00d4ff" data-color1="#00d4ff" data-color2="#ffffff" onclick="setNavGradientHalf(this, '#00d4ff', '#ffffff')" title="青白"></div>
+      <div class="grad-dot" style="background:#ffffff;--dot-color1:#ff6600" data-color1="#ff6600" data-color2="#ffffff" onclick="setNavGradientHalf(this, '#ff6600', '#ffffff')" title="橙白"></div>
+      <div class="grad-dot" style="background:#ffffff;--dot-color1:#9933ff" data-color1="#9933ff" data-color2="#ffffff" onclick="setNavGradientHalf(this, '#9933ff', '#ffffff')" title="紫白"></div>
+      <div class="grad-dot" style="background:#ffcc00;--dot-color1:#ff0055" data-color1="#ff0055" data-color2="#ffcc00" onclick="setNavGradientHalf(this, '#ff0055', '#ffcc00')" title="红金"></div>
+      <div class="grad-dot" style="background:#ffffff;--dot-color1:#00ff88" data-color1="#00ff88" data-color2="#ffffff" onclick="setNavGradientHalf(this, '#00ff88', '#ffffff')" title="绿白"></div>
+      <div class="grad-dot" style="background:#6600ff;--dot-color1:#ff0066" data-color1="#ff0066" data-color2="#6600ff" onclick="setNavGradientHalf(this, '#ff0066', '#6600ff')" title="红紫"></div>
+      <div class="grad-dot" style="background:#ff6600;--dot-color1:#00ccff" data-color1="#00ccff" data-color2="#ff6600" onclick="setNavGradientHalf(this, '#00ccff', '#ff6600')" title="青橙"></div>
+    </div>
+    <!-- 自定义渐变 -->
+    <div style="font-size:12px;opacity:0.55;margin-top:14px;margin-bottom:8px;">自定义渐变</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="color-swatch" id="grad-color1-swatch" style="background:#ff6b6b;width:32px;height:32px;">
+        <input type="color" id="grad-color1" value="#ff6b6b">
+      </div>
+      <span style="opacity:0.5;font-size:14px;">→</span>
+      <div class="color-swatch" id="grad-color2-swatch" style="background:#4ecdc4;width:32px;height:32px;">
+        <input type="color" id="grad-color2" value="#4ecdc4">
+      </div>
+      <button class="apply-btn" style="padding:5px 12px;font-size:11px;" onclick="applyCustomGradient()">确定</button>
+      <button class="reset-btn safe" style="padding:5px 12px;font-size:11px;" onclick="resetNavColor()">重置</button>
+    </div>
+    <div style="font-size:12px;opacity:0.55;margin-top:14px;margin-bottom:6px;">荧光色预设</div>
+    <div class="gradient-presets">
+      <div class="grad-dot" style="background:#00ff88;box-shadow:0 0 6px #00ff88;" onclick="setNavColorOnly('#00ff88',this)" title="荧光绿"></div>
+      <div class="grad-dot" style="background:#00e5ff;box-shadow:0 0 6px #00e5ff;" onclick="setNavColorOnly('#00e5ff',this)" title="荧光蓝"></div>
+      <div class="grad-dot" style="background:#ff00ff;box-shadow:0 0 6px #ff00ff;" onclick="setNavColorOnly('#ff00ff',this)" title="荧光紫"></div>
+      <div class="grad-dot" style="background:#ff3377;box-shadow:0 0 6px #ff3377;" onclick="setNavColorOnly('#ff3377',this)" title="荧光粉"></div>
+      <div class="grad-dot" style="background:#ff6600;box-shadow:0 0 6px #ff6600;" onclick="setNavColorOnly('#ff6600',this)" title="荧光橙"></div>
+      <div class="grad-dot" style="background:#ffee00;box-shadow:0 0 6px #ffee00;" onclick="setNavColorOnly('#ffee00',this)" title="荧光黄"></div>
+    </div>
+    </div><!-- /section-body -->
+
+    <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:14px;">✏️ 小组件文字颜色</div>
+    <div class="section-body" style="display:none;">
+    <div class="setting-row">
+      <div><div class="setting-label">单色模式</div><div class="setting-desc">自定义纯色</div></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="color-swatch" id="widget-color-swatch" style="background:#ffffff;width:32px;height:32px;">
+          <input type="color" id="widget-color-picker" value="#ffffff">
+        </div>
+        <span style="font-size:12px;opacity:0.6;" id="widget-color-val">#ffffff</span>
+        <button class="apply-btn" style="padding:5px 12px;font-size:11px;" onclick="setWidgetColorSingle()">确定</button>
+      </div>
+    </div>
+    <div style="font-size:12px;opacity:0.55;margin-top:12px;margin-bottom:6px;">渐变色预设</div>
+    <div class="gradient-presets">
+      <div class="grad-dot" id="widget-grad-0" style="background:#ffffff;--dot-color1:#ff3366" onclick="setWidgetGradientHalf(this, '#ff3366', '#ffffff', 0)" title="粉白"></div>
+      <div class="grad-dot" id="widget-grad-1" style="background:#ffffff;--dot-color1:#00d4ff" onclick="setWidgetGradientHalf(this, '#00d4ff', '#ffffff', 0)" title="青白"></div>
+      <div class="grad-dot" id="widget-grad-2" style="background:#ffffff;--dot-color1:#ff6600" onclick="setWidgetGradientHalf(this, '#ff6600', '#ffffff', 0)" title="橙白"></div>
+      <div class="grad-dot" id="widget-grad-3" style="background:#ffffff;--dot-color1:#9933ff" onclick="setWidgetGradientHalf(this, '#9933ff', '#ffffff', 0)" title="紫白"></div>
+      <div class="grad-dot" id="widget-grad-4" style="background:#ffcc00;--dot-color1:#ff0055" onclick="setWidgetGradientHalf(this, '#ff0055', '#ffcc00', 0)" title="红金"></div>
+      <div class="grad-dot" id="widget-grad-5" style="background:#ffffff;--dot-color1:#00ff88" onclick="setWidgetGradientHalf(this, '#00ff88', '#ffffff', 0)" title="绿白"></div>
+      <div class="grad-dot" id="widget-grad-6" style="background:#6600ff;--dot-color1:#ff0066" onclick="setWidgetGradientHalf(this, '#ff0066', '#6600ff', 0)" title="红紫"></div>
+      <div class="grad-dot" id="widget-grad-7" style="background:#ff6600;--dot-color1:#00ccff" onclick="setWidgetGradientHalf(this, '#00ccff', '#ff6600', 0)" title="青橙"></div>
+    </div>
+    <div style="font-size:12px;opacity:0.55;margin-top:14px;margin-bottom:8px;">自定义渐变</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="color-swatch" id="widget-grad-color1-swatch" style="background:#ff6b6b;width:32px;height:32px;">
+        <input type="color" id="widget-grad-color1" value="#ff6b6b">
+      </div>
+      <span style="opacity:0.5;font-size:14px;">→</span>
+      <div class="color-swatch" id="widget-grad-color2-swatch" style="background:#4ecdc4;width:32px;height:32px;">
+        <input type="color" id="widget-grad-color2" value="#4ecdc4">
+      </div>
+      <button class="apply-btn" style="padding:5px 12px;font-size:11px;" onclick="applyWidgetCustomGradient()">确定</button>
+      <button class="reset-btn safe" style="padding:5px 12px;font-size:11px;" onclick="resetWidgetColor()">重置</button>
+    </div>
+    </div><!-- /section-body -->
+
+    <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:14px;">✏️ 分类标题颜色</div>
+    <div class="section-body" style="display:none;">
+    <div class="setting-row">
+      <div><div class="setting-label">单色模式</div><div class="setting-desc">自定义纯色</div></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="color-swatch" id="section-color-swatch" style="background:rgba(255,255,255,0.92);width:32px;height:32px;">
+          <input type="color" id="section-color-picker" value="#ffffff">
+        </div>
+        <span style="font-size:12px;opacity:0.6;" id="section-color-val">rgba(255,255,255,0.92)</span>
+        <button class="apply-btn" style="padding:5px 12px;font-size:11px;" onclick="setSectionColorSingle()">确定</button>
+      </div>
+    </div>
+    <div style="font-size:12px;opacity:0.55;margin-top:12px;margin-bottom:6px;">渐变色预设</div>
+    <div class="gradient-presets">
+      <div class="grad-dot" id="section-grad-0" style="background:#ffffff;--dot-color1:#ff3366" onclick="setWidgetGradientHalf(this, '#ff3366', '#ffffff', 1)" title="粉白"></div>
+      <div class="grad-dot" id="section-grad-1" style="background:#ffffff;--dot-color1:#00d4ff" onclick="setWidgetGradientHalf(this, '#00d4ff', '#ffffff', 1)" title="青白"></div>
+      <div class="grad-dot" id="section-grad-2" style="background:#ffffff;--dot-color1:#ff6600" onclick="setWidgetGradientHalf(this, '#ff6600', '#ffffff', 1)" title="橙白"></div>
+      <div class="grad-dot" id="section-grad-3" style="background:#ffffff;--dot-color1:#9933ff" onclick="setWidgetGradientHalf(this, '#9933ff', '#ffffff', 1)" title="紫白"></div>
+      <div class="grad-dot" id="section-grad-4" style="background:#ffcc00;--dot-color1:#ff0055" onclick="setWidgetGradientHalf(this, '#ff0055', '#ffcc00', 1)" title="红金"></div>
+      <div class="grad-dot" id="section-grad-5" style="background:#ffffff;--dot-color1:#00ff88" onclick="setWidgetGradientHalf(this, '#00ff88', '#ffffff', 1)" title="绿白"></div>
+      <div class="grad-dot" id="section-grad-6" style="background:#6600ff;--dot-color1:#ff0066" onclick="setWidgetGradientHalf(this, '#ff0066', '#6600ff', 1)" title="红紫"></div>
+      <div class="grad-dot" id="section-grad-7" style="background:#ff6600;--dot-color1:#00ccff" onclick="setWidgetGradientHalf(this, '#00ccff', '#ff6600', 1)" title="青橙"></div>
+    </div>
+    <div style="font-size:12px;opacity:0.55;margin-top:14px;margin-bottom:8px;">自定义渐变</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="color-swatch" id="section-grad-color1-swatch" style="background:#ff6b6b;width:32px;height:32px;">
+        <input type="color" id="section-grad-color1" value="#ff6b6b">
+      </div>
+      <span style="opacity:0.5;font-size:14px;">→</span>
+      <div class="color-swatch" id="section-grad-color2-swatch" style="background:#4ecdc4;width:32px;height:32px;">
+        <input type="color" id="section-grad-color2" value="#4ecdc4">
+      </div>
+      <button class="apply-btn" style="padding:5px 12px;font-size:11px;" onclick="applySectionCustomGradient()">确定</button>
+      <button class="reset-btn safe" style="padding:5px 12px;font-size:11px;" onclick="resetSectionColor()">重置</button>
+    </div>
+    </div><!-- /section-body -->
+
+    <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:18px;">🔤 字体设置</div>
+    <div class="section-body" style="display:none;">
+    <div class="font-list" style="margin-top:5px;">
+      <div class="font-item active" style="font-family:system-ui" onclick="setFont(&quot;system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,PingFang SC,Microsoft YaHei,sans-serif&quot;,this)">
+        系统默认<span>跟随系统字体</span>
+      </div>
+      <div class="font-item" style="font-family:'Microsoft YaHei'" onclick="setFont(&quot;Microsoft YaHei,PingFang SC,sans-serif&quot;,this)">
+        微软雅黑 / 苹方<span>经典中文字体</span>
+      </div>
+      <div class="font-item" style="font-family:Georgia,serif" onclick="setFont(&quot;Georgia,Times New Roman,serif&quot;,this)">
+        Georgia Serif<span>优雅衬线字体</span>
+      </div>
+      <div class="font-item" style="font-family:'Courier New',monospace" onclick="setFont(&quot;Courier New,Consolas,monospace&quot;,this)">
+        Monospace 等宽<span>代码风字体</span>
+      </div>
+    </div>
+    <div class="setting-row" style="margin-top:12px;">
+      <div><div class="setting-label">字体大小</div><div class="setting-desc">导航按钮字号</div></div>
+      <div style="display:flex;align-items:center;gap:7px;">
+        <input type="range" min="11" max="18" value="13" id="fontsize-range" oninput="setFontSize(this.value)">
+        <span class="range-val" id="fontsize-val">13px</span>
+      </div>
+    </div>
+    </div><!-- /section-body -->
+  </div><!-- /tab-fontcolor -->
+
+  <!-- 其他设置 -->
+  <div class="tab-content" id="tab-other">
+
+    <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:0;">📂 副导航设置</div>
+    <div class="section-body" style="display:none;">
+    <div class="setting-row">
+      <div><div class="setting-label">导航一</div></div>
+      <input type="text" id="subnav-all-name" value="大全" onchange="setSubnavName('all',this.value)" style="width:80px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 8px;color:white;font-size:12px;text-align:center;">
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">导航二</div></div>
+      <input type="text" id="subnav-work-name" value="工作" onchange="setSubnavName('work',this.value)" style="width:80px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 8px;color:white;font-size:12px;text-align:center;">
+    </div>
+    </div><!-- /section-body -->
+
+    <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:18px;">🔄 重置选项</div>
+    <div class="section-body" style="display:none;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button class="reset-btn safe" onclick="resetAppearance()">&#9851; 重置外观设置（保留导航数据）</button>
+      <button class="reset-btn" onclick="resetNavData()">&#128465; 重置导航数据（恢复默认导航）</button>
+      <button class="reset-btn" onclick="resetAll()">&#9888; 全部重置（外观 + 导航）</button>
+    </div>
+    <div style="font-size:11px;opacity:0.35;margin-top:14px;line-height:1.6;">
+      外观设置包括：背景、主题色、透明度、毛玻璃、字体、字色等。<br>
+      导航数据包括：所有分类和链接的增删改移。
+    </div>
+    </div><!-- /section-body -->
+
+  </div>
+
+</div><!-- /settings-drawer -->
+
+<!-- 主体：三栏 -->
+<div class="wrap">
+  <!-- 左侧小组件 -->
+  <div class="sidebar">
+    <div id="sidebar-widgets">
+    <!-- 天气 + 问候 -->
+    <div class="weather-greeting" id="weather-greeting" data-widget="weather" onclick="window.open('https://tianqi.qq.com/','_blank')" style="cursor:pointer;">
+      <div class="weather-top">
+        <span class="weather-icon" id="weather-icon">☀️</span>
+        <span class="weather-temp" id="weather-temp">--°C</span>
+        <span class="weather-dot">·</span>
+        <span class="weather-city" id="weather-city">朔州</span>
+      </div>
+      <div class="weather-greeting-text" id="weather-greeting-text">加载中…</div>
+    </div>
+    <div class="card" id="widget-clock-card" data-widget="clock" onclick="window.open('https://time.is/','_blank')" style="cursor:pointer;">
+      <div class="clock-time" id="clock-hm">00:00<span class="sec" id="clock-s">00</span></div>
+      <div class="clock-sub">
+        <span class="clock-date" id="clock-date">加载中</span>
+        <span class="clock-weekday" id="clock-week"></span>
+      </div>
+      <div class="clock-lunar" id="clock-lunar"></div>
+    </div>
+    <div class="card" id="widget-cal-card" data-widget="cal" onclick="window.open('https://www.baidu.com/s?wd=%E4%B8%87%E5%B9%B4%E5%8E%86','_blank')" style="cursor:pointer;">
+      <div class="cal-header">
+        <button class="cal-nav" id="cal-prev">&#9664;</button>
+        <span id="cal-title" style="font-size:13px;"></span>
+        <button class="cal-nav" id="cal-next">&#9654;</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div class="card" id="widget-countdown-card" data-widget="countdown">
+      <div class="countdown-title">倒计时</div>
+      <div id="countdown-list"></div>
+    </div>
+    <div class="card" id="widget-yiyan-card" data-widget="yiyan">
+      <div class="yiyan-text" id="yiyan-text">加载中…</div>
+      <div class="yiyan-from" id="yiyan-from"></div>
+      <button class="yiyan-more" onclick="loadYiyan()">换一条 &#8634;</button>
+    </div>
+    </div><!-- /sidebar-widgets -->
+  </div>
+
+  <!-- 中间主区域 -->
+  <div class="main">
+    <div class="profile">
+      <div class="avatar-ring">
+        <img src="b_d67eb84687938f35aa4051abb68cd701.jpg" alt="avatar"
+             onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=Ruizz'">
+      </div>
+      <div class="profile-name">&#x1D4E1;&#x1D4FE;&#x1D4F2;&#x1D503;&#x1D503;</div>
+    </div>
+
+    <!-- 搜索框（整体毛玻璃胶囊） -->
+    <div class="search-wrap">
+      <div class="search-bar">
+        <input class="search-input" id="search-input" type="text" placeholder="搜索一下，你就知道…" autocomplete="off" />
+        <div class="search-actions">
+          <button class="engine-btn" id="engine-btn" onclick="toggleEngineMenu()">百度 ▼</button>
+          <button class="search-btn" onclick="doSearch()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+      <!-- 搜索建议框（放在 search-bar 外面，避免毛玻璃嵌套问题） -->
+      <div class="search-suggestions" id="search-suggestions"></div>
+    </div>
+
+    <div class="nav-grid" id="nav-grid"></div>
+  </div>
+
+  <!-- 右侧小组件 -->
+  <div class="right-sidebar">
+    <!-- 大全/工作按钮 -->
+    <div style="position:absolute; top:20px; left:5px; display:flex; align-items:center; gap:8px;">
+      <button class="nav-all-btn" id="nav-all-btn" onclick="goToNavAll()" title="大全">大全</button>
+      <button class="nav-all-btn" id="nav-work-btn" onclick="goToWork()" title="工作">工作</button>
+    </div>
+    <!-- 设置按钮 -->
+    <div style="position:absolute; top:20px; right:5px;">
+      <button class="settings-btn" onclick="toggleSettings()" title="设置">⚙</button>
+    </div>
+    <div class="card widget-player-card" data-widget="music">
+      <div class="widget-player-header">
+        <div class="widget-player-title">
+          <span class="player-mode active" id="mode-music" onclick="switchPlayerMode('music')">&#9835; 音乐</span>
+          <span class="player-mode" id="mode-radio" onclick="switchPlayerMode('radio')">&#127911; 电台</span>
+        </div>
+      </div>
+      <div class="widget-player-body">
+        <div class="widget-player-info">
+          <div class="widget-player-song" id="widget-player-song">随机中文歌曲</div>
+          <div class="widget-player-artist" id="widget-player-artist">点击播放</div>
+          <div class="widget-player-controls">
+            <button class="widget-player-btn" id="widget-player-prev" title="上一首">&lt;&lt;</button>
+            <button class="widget-player-btn play" id="widget-player-play" title="播放">&gt;</button>
+            <button class="widget-player-btn" id="widget-player-next" title="下一首">&gt;&gt;</button>
+          </div>
+          <div class="widget-player-progress">
+            <span class="widget-player-time" id="widget-player-current">0:00</span>
+            <input type="range" id="widget-player-progress" min="0" max="100" value="0">
+            <span class="widget-player-time" id="widget-player-duration">0:00</span>
+          </div>
+          <div class="widget-player-loading" id="widget-player-loading"></div>
+        </div>
+        <!-- 右侧音量控制 -->
+        <div class="widget-volume-vertical">
+          <span id="widget-player-mute" title="静音">V</span>
+          <div class="volume-slider-wrap">
+            <input type="range" id="widget-player-volume" min="0" max="100" value="70" step="1">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 今日热搜/头条小组件 -->
+    <div class="card widget-hotsearch-card" data-widget="hotsearch">
+      <div class="widget-hotsearch-header">
+        <div class="widget-hotsearch-title">
+          <span class="title-tab active" onclick="switchHotType('hotsearch', this)">🔥 热搜</span>
+          <span class="title-tab" onclick="switchHotType('headline', this)">📰 头条</span>
+        </div>
+        <button class="widget-hotsearch-refresh" onclick="refreshCurrentView()" title="刷新">↻</button>
+      </div>
+      <div class="widget-hotsearch-tabs" id="platform-tabs">
+        <button class="hotsearch-tab active" onclick="switchHotSearchPlatform('douyin', this)">抖音</button>
+        <button class="hotsearch-tab" onclick="switchHotSearchPlatform('bilibili', this)">哔哩</button>
+        <button class="hotsearch-tab" onclick="switchHotSearchPlatform('weibo', this)">微博</button>
+        <button class="hotsearch-tab" onclick="switchHotSearchPlatform('zhihu', this)">知乎</button>
+      </div>
+      <div class="widget-hotsearch-body" id="hotsearch-list">
+        <div class="widget-hotsearch-loading">加载中...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+function toggleSection(el) {
+  el.classList.toggle('collapsed');
+  var body = el.nextElementSibling;
+  if (!body || !body.classList.contains('section-body')) return;
+  body.style.display = el.classList.contains('collapsed') ? 'none' : 'block';
+}
+
+// ===== 默认导航数据（用于重置） =====
+var DEFAULT_NAV = [
+  { name: '🚀 每日必访', items: [
+    { name:'ChatGPT', url:'https://chat.openai.com' },
+    { name:'DeepSeek', url:'https://www.deepseek.com' },
+    { name:'Kimi', url:'https://kimi.moonshot.cn' },
+    { name:'豆包', url:'https://www.doubao.com' },
+    { name:'微博热搜', url:'https://weibo.com' },
+    { name:'知乎热榜', url:'https://www.zhihu.com/hot' },
+    { name:'百度', url:'https://www.baidu.com' },
+    { name:'B站热门', url:'https://www.bilibili.com' },
+    { name:'今日热榜', url:'https://tophub.today' }
+  ]},
+  { name: '💬 社交圈子', items: [
+    { name:'微信', url:'https://weixin.qq.com' },
+    { name:'QQ', url:'https://im.qq.com' },
+    { name:'微博', url:'https://weibo.com' },
+    { name:'知乎', url:'https://www.zhihu.com' },
+    { name:'小红书', url:'https://www.xiaohongshu.com' },
+    { name:'豆瓣', url:'https://www.douban.com' },
+    { name:'NGA', url:'https://bbs.nga.cn' },
+    { name:'V2EX', url:'https://www.v2ex.com' },
+    { name:'Telegram', url:'https://telegram.org' }
+  ]},
+  { name: '🎵 影音世界', items: [
+    { name:'B站', url:'https://www.bilibili.com' },
+    { name:'YouTube', url:'https://www.youtube.com' },
+    { name:'网易云', url:'https://music.163.com' },
+    { name:'QQ音乐', url:'https://y.qq.com' },
+    { name:'爱奇艺', url:'https://www.iqiyi.com' },
+    { name:'腾讯视频', url:'https://v.qq.com' },
+    { name:'抖音', url:'https://www.douyin.com' },
+    { name:'虎牙直播', url:'https://www.huya.com' },
+    { name:'斗鱼', url:'https://www.douyu.com' }
+  ]},
+  { name: '📡 信息流', items: [
+    { name:'36氪', url:'https://www.36kr.com' },
+    { name:'虎嗅', url:'https://www.huxiu.com' },
+    { name:'IT之家', url:'https://www.ithome.com' },
+    { name:'少数派', url:'https://sspai.com' },
+    { name:'果壳', url:'https://www.guokr.com' },
+    { name:'澎湃新闻', url:'https://www.thepaper.cn' },
+    { name:'新浪财经', url:'https://finance.sina.com.cn' },
+    { name:'Hacker News', url:'https://news.ycombinator.com' },
+    { name:'Product Hunt', url:'https://www.producthunt.com' }
+  ]},
+  { name: '⚡ 效率工具', items: [
+    { name:'Notion', url:'https://www.notion.so' },
+    { name:'飞书', url:'https://www.feishu.cn' },
+    { name:'腾讯文档', url:'https://docs.qq.com' },
+    { name:'ProcessOn', url:'https://www.processon.com' },
+    { name:'iLovePDF', url:'https://www.ilovepdf.com' },
+    { name:'草料二维码', url:'https://cli.im' },
+    { name:'JSON解析', url:'https://www.json.cn' },
+    { name:'临时邮箱', url:'https://10minutemail.com' },
+    { name:'在线PS', url:'https://www.photopea.com' }
+  ]},
+  { name: '🌟 探索发现', items: [
+    { name:'GitHub', url:'https://github.com' },
+    { name:'Pixabay', url:'https://pixabay.com' },
+    { name:'Wallhaven', url:'https://wallhaven.cc' },
+    { name:'Unsplash', url:'https://unsplash.com' },
+    { name:'Z-Library', url:'https://singlelogin.re' },
+    { name:'菜鸟教程', url:'https://www.runoob.com' },
+    { name:'MDN', url:'https://developer.mozilla.org/zh-CN' },
+    { name:'Can I Use', url:'https://caniuse.com' },
+    { name:'Docker Hub', url:'https://hub.docker.com' }
+  ]},
+  { name: '💼 工作学习', items: [
+    { name:'Gmail', url:'https://mail.google.com' },
+    { name:'QQ邮箱', url:'https://mail.qq.com' },
+    { name:'网易邮箱', url:'https://mail.163.com' },
+    { name:'石墨文档', url:'https://shimo.im' },
+    { name:'幕布', url:'https://mubu.com' },
+    { name:'多邻国', url:'https://www.duolingo.com' },
+    { name:'中国大学MOOC', url:'https://www.icourse163.org' },
+    { name:'微信读书', url:'https://weread.qq.com' },
+    { name:'知网', url:'https://www.cnki.net' }
+  ]}
+];
+
+// ===== 数据 =====
+var navData = [];
+var currentEngine = 'https://www.baidu.com/s?wd=';
+var searchEngines = {
+  baidu: 'https://www.baidu.com/s?wd=',
+  google: 'https://www.google.com/search?q=',
+  bing: 'https://www.bing.com/search?q=',
+  bilibili: 'https://search.bilibili.com/all?keyword=',
+  zhihu: 'https://www.zhihu.com/search?type=content&q='
+};
+
+// 导航大全
+function goToNavAll() {
+  window.location.href = 'nav-all.html';
+}
+
+// 导航工作页
+function goToWork() {
+  window.location.href = 'nav-work.html';
+}
+
+// ===== 副导航名称设置 =====
+function setSubnavName(type, name) {
+  if (!name) return;
+  var id = type === 'all' ? 'nav-all-btn' : 'nav-work-btn';
+  var btn = document.getElementById(id);
+  if (btn) btn.textContent = name;
+  localStorage.setItem('subnav-' + type + '-name', name);
+}
+function loadSubnavNames() {
+  var allName = localStorage.getItem('subnav-all-name');
+  var workName = localStorage.getItem('subnav-work-name');
+  if (allName) {
+    document.getElementById('nav-all-btn').textContent = allName;
+    document.getElementById('subnav-all-name').value = allName;
+  }
+  if (workName) {
+    document.getElementById('nav-work-btn').textContent = workName;
+    document.getElementById('subnav-work-name').value = workName;
+  }
+}
+
+// 搜索引擎菜单
+function toggleEngineMenu() {
+  var menu = document.getElementById('engine-menu');
+  if (menu.classList.contains('show')) {
+    menu.classList.remove('show');
+  } else {
+    var btn = document.getElementById('engine-btn');
+    var rect = btn.getBoundingClientRect();
+    menu.style.top = (rect.bottom + 6) + 'px';
+    menu.style.right = (window.innerWidth - rect.right) + 'px';
+    menu.style.left = 'auto';
+    menu.classList.add('show');
+  }
+}
+function selectEngine(key, name) {
+  currentEngine = searchEngines[key] || searchEngines.baidu;
+  document.getElementById('engine-btn').innerHTML = name + ' <span style="font-size:10px;">▼</span>';
+  document.getElementById('engine-menu').classList.remove('show');
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.engine-btn') && !e.target.closest('.engine-menu')) {
+    var menu = document.getElementById('engine-menu');
+    if (menu) menu.classList.remove('show');
+  }
+});
+
+// ===== 保存/加载 =====
+var settings = {};
+function saveSettings() {
+  try { localStorage.setItem('app-settings', JSON.stringify(settings)); } catch(e) {}
+}
+function loadSettings() {
+  try {
+    var s = localStorage.getItem('app-settings');
+    if (s) { settings = JSON.parse(s); }
+  } catch(e) {}
+  applySettings();
+}
+function applySettings() {
+  if (settings.overlay !== undefined) {
+    document.getElementById('overlay-range').value = settings.overlay;
+    document.getElementById('overlay-val').textContent = settings.overlay + '%';
+    setVar('--bg-overlay', 'rgba(0,0,0,' + (settings.overlay / 100) + ')');
+  }
+  if (settings.brightness !== undefined) {
+    document.getElementById('brightness-range').value = settings.brightness;
+    document.getElementById('brightness-val').textContent = settings.brightness + '%';
+    document.getElementById('bg').style.filter = 'brightness(' + (settings.brightness / 100) + ')';
+  }
+  if (settings.cardOpacity !== undefined) {
+    document.getElementById('card-opacity-range').value = settings.cardOpacity;
+    document.getElementById('card-opacity-val').textContent = settings.cardOpacity + '%';
+    setVar('--card-opacity', settings.cardOpacity / 100);
+  }
+  if (settings.searchOpacity !== undefined) {
+    document.getElementById('search-opacity-range').value = settings.searchOpacity;
+    document.getElementById('search-opacity-val').textContent = settings.searchOpacity + '%';
+    setVar('--search-opacity', settings.searchOpacity / 100);
+  }
+  if (settings.navOpacity !== undefined) {
+    document.getElementById('nav-opacity-range').value = settings.navOpacity;
+    document.getElementById('nav-opacity-val').textContent = settings.navOpacity + '%';
+    setVar('--nav-opacity', settings.navOpacity / 100);
+    document.querySelectorAll('.nav-item').forEach(function(n) { n.style.background = 'rgba(255,255,255,' + (settings.navOpacity / 100) + ')'; });
+  }
+  if (settings.fontSize !== undefined) {
+    document.getElementById('fontsize-range').value = settings.fontSize;
+    document.getElementById('fontsize-val').textContent = settings.fontSize + 'px';
+    document.querySelectorAll('.nav-item').forEach(function(n) { n.style.fontSize = settings.fontSize + 'px'; });
+  }
+  if (settings.accent) { setVar('--accent', settings.accent); }
+  if (settings.navColor) {
+    var nc = settings.navColor;
+    if (nc.indexOf('gradient') !== -1) {
+      setVar('--nav-item-gradient', nc);
+      setVar('--nav-item-color', 'rgba(255,255,255,0.93)');
+    } else {
+      setVar('--nav-item-gradient', 'none');
+      setVar('--nav-item-color', nc);
+    }
+  }
+  // 其他文字颜色
+  if (settings.widgetColor) {
+    document.getElementById('widget-color-picker').value = settings.widgetColor;
+    document.getElementById('widget-color-swatch').style.background = settings.widgetColor;
+    document.getElementById('widget-color-val').textContent = settings.widgetColor;
+    if (settings.widgetColorType === 'gradient' && settings.widgetColor.indexOf('gradient') !== -1) {
+      document.querySelectorAll('.card').forEach(function(c) {
+        c.style.backgroundImage = settings.widgetColor;
+        c.style.webkitBackgroundClip = 'text';
+        c.style.backgroundClip = 'text';
+        c.style.webkitTextFillColor = 'transparent';
+        c.style.color = '';
+      });
+    } else {
+      document.querySelectorAll('.card').forEach(function(c) {
+        c.style.color = settings.widgetColor;
+      });
+    }
+  }
+  if (settings.sectionColor) {
+    document.getElementById('section-color-picker').value = settings.sectionColor;
+    document.getElementById('section-color-swatch').style.background = settings.sectionColor;
+    document.getElementById('section-color-val').textContent = settings.sectionColor;
+    if (settings.sectionColorType === 'gradient' && settings.sectionColor.indexOf('gradient') !== -1) {
+      document.querySelectorAll('.nav-section-title').forEach(function(t) {
+        t.style.backgroundImage = settings.sectionColor;
+        t.style.webkitBackgroundClip = 'text';
+        t.style.backgroundClip = 'text';
+        t.style.webkitTextFillColor = 'transparent';
+        t.style.color = '';
+      });
+    } else {
+      document.querySelectorAll('.nav-section-title').forEach(function(t) {
+        t.style.color = settings.sectionColor;
+      });
+    }
+  }
+  if (settings.bgImage) { document.getElementById('bg').style.backgroundImage = "url('" + settings.bgImage + "')"; document.getElementById('bg').style.backgroundColor = ''; }
+}
+function saveData() {
+  try { localStorage.setItem('nav-data', JSON.stringify(navData)); } catch(e) {}
+}
+function loadData() {
+  try {
+    var d = localStorage.getItem('nav-data');
+    if (d) { navData = JSON.parse(d); } else { navData = deepClone(DEFAULT_NAV); }
+  } catch(e) { navData = deepClone(DEFAULT_NAV); }
+}
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+loadData();
+loadSettings();
+loadSubnavNames();
+loadSbar();
+
+// ===== 渲染导航 =====
+function renderNav() {
+  var grid = document.getElementById('nav-grid');
+  grid.innerHTML = '';
+  navData.forEach(function(section, si) {
+    var secDiv = document.createElement('div');
+    secDiv.className = 'nav-section';
+    secDiv.dataset.sectionIndex = si;
+
+    var titleDiv = document.createElement('div');
+    titleDiv.className = 'nav-section-title';
+    titleDiv.textContent = section.name;
+    titleDiv.addEventListener('contextmenu', function(e) { e.preventDefault(); showCtxSection(e, si); });
+    secDiv.appendChild(titleDiv);
+
+    var itemsDiv = document.createElement('div');
+    itemsDiv.className = 'nav-items';
+    section.items.forEach(function(item, ii) {
+      var a = document.createElement('a');
+      a.className = 'nav-item';
+      a.href = item.url;
+      a.target = '_blank';
+      a.textContent = item.name;
+      applyNavItemStyle(a);
+      a.addEventListener('contextmenu', function(e) { e.preventDefault(); showCtxItem(e, si, ii); });
+      itemsDiv.appendChild(a);
+    });
+    secDiv.appendChild(itemsDiv);
+    grid.appendChild(secDiv);
+  });
+}
+renderNav();
+
+// ===== 导航文字颜色应用 =====
+function applyNavItemStyle(el) {
+  var grad = getComputedStyle(document.documentElement).getPropertyValue('--nav-item-gradient').trim();
+  if (grad && grad !== 'none') {
+    el.style.backgroundImage = grad;
+    el.style.webkitBackgroundClip = 'text';
+    el.style.backgroundClip = 'text';
+    el.style.webkitTextFillColor = 'transparent';
+    el.style.color = '';
+  } else {
+    el.style.backgroundImage = '';
+    el.style.webkitBackgroundClip = '';
+    el.style.backgroundClip = '';
+    el.style.webkitTextFillColor = '';
+    el.style.color = getComputedStyle(document.documentElement).getPropertyValue('--nav-item-color').trim();
+  }
+}
+function refreshNavItemStyles() {
+  document.querySelectorAll('.nav-item').forEach(function(n) { applyNavItemStyle(n); });
+}
+
+// ===== 右键：分类 =====
+var ctxSecIdx = -1;
+
+function showCtxSection(e, idx) {
+  ctxSecIdx = idx;
+  var menu = document.getElementById('ctx-section');
+  var sub = document.getElementById('ctx-moveTo-section');
+  sub.innerHTML = '';
+  navData.forEach(function(s, i) {
+    if (i === idx) return;
+    var opt = document.createElement('div');
+    opt.className = 'ctx-item';
+    opt.textContent = s.name;
+    (function(toIdx) {
+      opt.onclick = function() { moveSectionTo(idx, toIdx); hideCtx(); };
+    })(i);
+    sub.appendChild(opt);
+  });
+  if (sub.children.length === 0) {
+    var none = document.createElement('div');
+    none.className = 'ctx-item'; none.style.opacity = '0.4';
+    none.textContent = '无其他分类'; none.onclick = function() {};
+    sub.appendChild(none);
+  }
+  showCtxAt(menu, e.clientX, e.clientY);
+}
+
+function ctxRenameSection() {
+  hideCtx();
+  var s = navData[ctxSecIdx];
+  showModal('重命名分类', '输入新名称：', s.name, function(val) {
+    navData[ctxSecIdx].name = val;
+    saveData(); renderNav();
+  });
+}
+function ctxAddItem() {
+  hideCtx();
+  showModal('添加导航', '名称：', '', function(name) {
+    showModal('添加导航', '链接：', 'https://', function(url) {
+      navData[ctxSecIdx].items.push({ name: name, url: url });
+      saveData(); renderNav();
+    });
+  });
+}
+function ctxAddSection() {
+  hideCtx();
+  navData.splice(ctxSecIdx + 1, 0, { name: '新分类', items: [] });
+  saveData(); renderNav();
+}
+function ctxDeleteSection() {
+  hideCtx();
+  if (navData.length <= 1) { alert('至少保留一个分类'); return; }
+  navData.splice(ctxSecIdx, 1);
+  saveData(); renderNav();
+}
+function ctxMoveSectionUp() {
+  hideCtx();
+  if (ctxSecIdx <= 0) return;
+  var tmp = navData[ctxSecIdx - 1];
+  navData[ctxSecIdx - 1] = navData[ctxSecIdx];
+  navData[ctxSecIdx] = tmp;
+  ctxSecIdx--;
+  saveData(); renderNav();
+}
+function ctxMoveSectionDown() {
+  hideCtx();
+  if (ctxSecIdx >= navData.length - 1) return;
+  var tmp = navData[ctxSecIdx + 1];
+  navData[ctxSecIdx + 1] = navData[ctxSecIdx];
+  navData[ctxSecIdx] = tmp;
+  ctxSecIdx++;
+  saveData(); renderNav();
+}
+
+// ===== 右键：导航卡片 =====
+var ctxItemSec = -1, ctxItemIdx = -1;
+
+function showCtxItem(e, si, ii) {
+  ctxItemSec = si; ctxItemIdx = ii;
+  var menu = document.getElementById('ctx-item-menu');
+  var sub = document.getElementById('ctx-moveTo-item');
+  sub.innerHTML = '';
+  navData.forEach(function(s, i) {
+    var opt = document.createElement('div');
+    opt.className = 'ctx-item';
+    opt.textContent = s.name;
+    (function(toSec) {
+      opt.onclick = function() { moveItemTo(ctxItemSec, ctxItemIdx, toSec); hideCtx(); };
+    })(i);
+    sub.appendChild(opt);
+  });
+  showCtxAt(menu, e.clientX, e.clientY);
+}
+
+function ctxEditItemName() {
+  hideCtx();
+  var item = navData[ctxItemSec].items[ctxItemIdx];
+  showModal('编辑名称', '新名称：', item.name, function(val) {
+    navData[ctxItemSec].items[ctxItemIdx].name = val;
+    saveData(); renderNav();
+  });
+}
+function ctxEditItemUrl() {
+  hideCtx();
+  var item = navData[ctxItemSec].items[ctxItemIdx];
+  showModal('编辑链接', '新链接：', item.url, function(val) {
+    navData[ctxItemSec].items[ctxItemIdx].url = val;
+    saveData(); renderNav();
+  });
+}
+function ctxAddItemHere() {
+  hideCtx();
+  showModal('在此添加', '名称：', '', function(name) {
+    showModal('在此添加', '链接：', 'https://', function(url) {
+      navData[ctxItemSec].items.splice(ctxItemIdx + 1, 0, { name: name, url: url });
+      saveData(); renderNav();
+    });
+  });
+}
+function ctxDeleteItem() {
+  hideCtx();
+  navData[ctxItemSec].items.splice(ctxItemIdx, 1);
+  saveData(); renderNav();
+}
+function ctxMoveItemLeft() {
+  hideCtx();
+  if (ctxItemIdx <= 0) return;
+  var items = navData[ctxItemSec].items;
+  var tmp = items[ctxItemIdx - 1];
+  items[ctxItemIdx - 1] = items[ctxItemIdx];
+  items[ctxItemIdx] = tmp;
+  ctxItemIdx--;
+  saveData(); renderNav();
+}
+function ctxMoveItemRight() {
+  hideCtx();
+  var items = navData[ctxItemSec].items;
+  if (ctxItemIdx >= items.length - 1) return;
+  var tmp = items[ctxItemIdx + 1];
+  items[ctxItemIdx + 1] = items[ctxItemIdx];
+  items[ctxItemIdx] = tmp;
+  ctxItemIdx++;
+  saveData(); renderNav();
+}
+
+// ===== 迁移 =====
+function moveItemTo(fromSec, fromIdx, toSec) {
+  if (fromSec === toSec) return;
+  var item = navData[fromSec].items.splice(fromIdx, 1)[0];
+  navData[toSec].items.push(item);
+  saveData(); renderNav();
+}
+function moveSectionTo(fromIdx, toIdx) {
+  var sec = navData.splice(fromIdx, 1)[0];
+  navData.splice(toIdx, 0, sec);
+  saveData(); renderNav();
+}
+
+// ===== 右键菜单显示/隐藏 =====
+function showCtxAt(menu, x, y) {
+  hideCtx();
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+  menu.classList.add('show');
+  requestAnimationFrame(function() {
+    var rect = menu.getBoundingClientRect();
+    if (rect.right > window.innerWidth) { menu.style.left = (x - rect.width) + 'px'; }
+    if (rect.bottom > window.innerHeight) { menu.style.top = (y - rect.height) + 'px'; }
+  });
+}
+function hideCtx() {
+  document.querySelectorAll('.ctx-menu').forEach(function(m) { m.classList.remove('show'); });
+}
+document.addEventListener('click', function() { hideCtx(); });
+document.addEventListener('contextmenu', function(e) {
+  if (!e.target.closest('.nav-section-title') && !e.target.closest('.nav-item')) {
+    hideCtx();
+  }
+});
+
+// ===== 弹窗 =====
+var modalCallback = null;
+function showModal(title, label, placeholder, callback) {
+  var modal = document.getElementById('modal');
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-label').textContent = label;
+  var input = document.getElementById('modal-input');
+  input.value = placeholder;
+  modalCallback = callback;
+  modal.classList.add('show');
+  setTimeout(function() { input.select(); input.focus(); }, 50);
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+  modalCallback = null;
+}
+function modalOk() {
+  var val = document.getElementById('modal-input').value.trim();
+  if (!val) return;
+  var cb = modalCallback;
+  closeModal();
+  if (cb) { cb(val); }
+}
+document.getElementById('modal-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { modalOk(); }
+  if (e.key === 'Escape') { closeModal(); }
+});
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === document.getElementById('modal')) { closeModal(); }
+});
+
+// ===== CSS 变量工具 =====
+function setVar(k, v) { document.documentElement.style.setProperty(k, v); }
+
+// ===== 时钟 =====
+// 农历转换
+var lunarInfo = [
+  0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,
+  0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,
+  0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,
+  0x06566,0x0d4a0,0x0ea50,0x16a95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,
+  0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,
+  0x06ca0,0x0b550,0x15355,0x04da0,0x0a5b0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0,
+  0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,
+  0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,
+  0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,
+  0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x05ac0,0x0ab60,0x096d5,0x092e0,
+  0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,
+  0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,
+  0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,
+  0x05aa0,0x076a3,0x096d0,0x04afb,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,
+  0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0
+];
+var Gan = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+var Zhi = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+var Animals = ['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
+var lunarMonths = ['正','二','三','四','五','六','七','八','九','十','冬','腊'];
+var lunarDays = ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十',
+  '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
+  '廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
+function solar2lunar(y,m,d) {
+  var baseDate = new Date(1900,0,31); var offset = Math.floor((new Date(y,m-1,d)-baseDate)/86400000);
+  var lunarY,lunarM,lunarD; for(lunarY=1900;lunarY<2101&&offset>0;lunarY++){var yd=lunarYearDays(lunarY);offset-=yd}
+  if(offset<0){offset+=yd;lunarY--} var lm=leapMonthOfYear(lunarY),isLeap=false;
+  for(lunarM=1;lunarM<13&&offset>0;lunarM++){var md;if(lm>0&&lunarM===lm+1){if(isLeap){md=lunarMonthDays(lunarY,lunarM-1)}else{md=leapMonthDays(lunarY);isLeap=true;lunarM--}}else{md=lunarMonthDays(lunarY,lunarM)}offset-=md}
+  if(offset<0){offset+=md;lunarM--} lunarD=offset+1;
+  return{month:lunarM,day:lunarD,monthStr:(isLeap?'闰':'')+lunarMonths[lunarM-1]+'月',dayStr:lunarDays[lunarD-1],yearStr:Gan[(y-4)%10]+Zhi[(y-4)%12]+'年【'+Animals[(y-4)%12]+'年】'};
+}
+function lunarYearDays(y){var s=0;for(var i=0x8000;i>0x8;i>>=1){s+=(lunarInfo[y-1900]&i)?30:29}return s+leapMonthDays(y)}
+function leapMonthOfYear(y){return lunarInfo[y-1900]&0xf}
+function leapMonthDays(y){return(lunarInfo[y-1900]&0x10000)?30:29}
+function lunarMonthDays(y,m){return(lunarInfo[y-1900]&(0x10000>>m))?30:29}
+
+function updateClock() {
+  var now = new Date();
+  var h = String(now.getHours()).padStart(2, '0');
+  var m = String(now.getMinutes()).padStart(2, '0');
+  var hm = h + ':' + m;
+  var clockHm = document.getElementById('clock-hm');
+  if (clockHm.firstChild) { clockHm.firstChild.nodeValue = hm; }
+  document.getElementById('clock-s').textContent = String(now.getSeconds()).padStart(2, '0');
+  var weeks = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+  var y = now.getFullYear(), mo = now.getMonth() + 1, d = now.getDate();
+  document.getElementById('clock-date').textContent = y + '年' + String(mo).padStart(2, '0') + '月' + String(d).padStart(2, '0') + '日';
+  document.getElementById('clock-week').textContent = weeks[now.getDay()];
+  try { var lu = solar2lunar(y,mo,d); document.getElementById('clock-lunar').textContent = lu.yearStr + ' ' + lu.monthStr + lu.dayStr; } catch(e) {}
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ===== 日历 =====
+var calYear = new Date().getFullYear();
+var calMonth = new Date().getMonth();
+function renderCal() {
+  var today = new Date();
+  document.getElementById('cal-title').textContent = calYear + '年' + (calMonth + 1) + '月';
+  var grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+  ['日','一','二','三','四','五','六'].forEach(function(d) {
+    var el = document.createElement('div');
+    el.className = 'day-name'; el.textContent = d; grid.appendChild(el);
+  });
+  var first = new Date(calYear, calMonth, 1).getDay();
+  var days = new Date(calYear, calMonth + 1, 0).getDate();
+  var prevDays = new Date(calYear, calMonth, 0).getDate();
+  for (var i = 0; i < first; i++) {
+    var el = document.createElement('div');
+    el.className = 'day other-month';
+    el.textContent = prevDays - first + 1 + i;
+    grid.appendChild(el);
+  }
+  for (var d = 1; d <= days; d++) {
+    var el = document.createElement('div');
+    el.className = 'day';
+    if (d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear()) {
+      el.classList.add('today');
+    }
+    el.textContent = d;
+    grid.appendChild(el);
+  }
+  var remain = 42 - first - days;
+  for (var i = 1; i <= remain; i++) {
+    var el = document.createElement('div');
+    el.className = 'day other-month'; el.textContent = i; grid.appendChild(el);
+  }
+}
+document.getElementById('cal-prev').onclick = function(e) {
+  e.stopPropagation();
+  calMonth--;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCal();
+};
+document.getElementById('cal-next').onclick = function(e) {
+  e.stopPropagation();
+  calMonth++;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCal();
+};
+renderCal();
+
+// ===== 倒计时 =====
+var holidays = [
+  { name: '元旦', date: '01-01' },
+  { name: '春节', date: '01-29' },
+  { name: '劳动节', date: '05-01' },
+  { name: '国庆节', date: '10-01' }
+];
+function renderCountdown() {
+  var now = new Date();
+  var list = document.getElementById('countdown-list');
+  list.innerHTML = '';
+  holidays.forEach(function(h) {
+    var target = new Date(now.getFullYear() + '-' + h.date);
+    if (target <= now) { target = new Date((now.getFullYear() + 1) + '-' + h.date); }
+    var diff = Math.ceil((target - now) / 864e5);
+    var el = document.createElement('div');
+    el.className = 'countdown-item';
+    el.innerHTML = '<span class="label">' + h.name + '</span><span class="days">' + diff + ' 天</span>';
+    list.appendChild(el);
+  });
+}
+renderCountdown();
+
+// ===== 一言 =====
+function loadYiyan() {
+  fetch('https://v1.hitokoto.cn/?encode=json&charset=utf-8')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      document.getElementById('yiyan-text').textContent = data.hitokoto;
+      document.getElementById('yiyan-from').textContent = '\u2014\u2014 ' + (data.from_who || data.from || '佚名');
+    })
+    .catch(function() {
+      var fb = [
+        { t: '人生是一条没有回程的单行道。', f: '佚名' },
+        { t: '愿你出走半生，归来仍是少年。', f: '佚名' },
+        { t: '种一棵树最好的时间是十年前，其次是现在。', f: '佚名' }
+      ];
+      var r = fb[Math.floor(Math.random() * fb.length)];
+      document.getElementById('yiyan-text').textContent = r.t;
+      document.getElementById('yiyan-from').textContent = '\u2014\u2014 ' + r.f;
+    });
+}
+loadYiyan();
+
+// ===== 搜索历史和联想 =====
+var searchHistory = [];
+
+function loadSearchHistory() {
+  try {
+    var h = localStorage.getItem('search-history');
+    if (h) searchHistory = JSON.parse(h);
+  } catch(e) {}
+}
+function saveSearchHistory() {
+  try { localStorage.setItem('search-history', JSON.stringify(searchHistory)); } catch(e) {}
+}
+loadSearchHistory();
+
+function showSuggestions(query) {
+  var box = document.getElementById('search-suggestions');
+  
+  if (!query || query.length < 1) {
+    if (searchHistory.length > 0) {
+      var html = '<div class="suggest-title">历史记录</div>';
+      searchHistory.slice(0, 5).forEach(function(h) {
+        html += '<div class="suggestion-item history-item" onclick="searchFromSuggestion(\'' + h.replace(/'/g, "\\'") + '\')">';
+        html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+        html += '<span>' + h + '</span>';
+        html += '<span class="delete-btn" onclick="event.stopPropagation(); deleteHistory(\'' + h.replace(/'/g, "\\'") + '\')">✕</span>';
+        html += '</div>';
+      });
+      box.innerHTML = html;
+      box.classList.add('show');
+    } else {
+      box.classList.remove('show');
+    }
+    return;
+  }
+  var matched = searchHistory.filter(function(h) { return h.includes(query) && h !== query; }).slice(0, 4);
+  if (matched.length > 0) {
+    var html = '<div class="suggest-title">搜索建议</div>';
+    matched.forEach(function(s) {
+      html += '<div class="suggestion-item" onclick="searchFromSuggestion(\'' + s.replace(/'/g, "\\'") + '\')">';
+      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>';
+      html += '<span>' + s + '</span></div>';
+    });
+    box.innerHTML = html;
+    box.classList.add('show');
+  } else {
+    box.classList.remove('show');
+  }
+}
+
+function searchFromSuggestion(text) {
+  document.getElementById('search-input').value = text;
+  document.getElementById('search-suggestions').classList.remove('show');
+  doSearchDirect(text);
+}
+
+function deleteHistory(text) {
+  searchHistory = searchHistory.filter(function(h) { return h !== text; });
+  saveSearchHistory();
+  showSuggestions(document.getElementById('search-input').value);
+}
+
+var suggestTimer = null;
+document.getElementById('search-input').addEventListener('input', function(e) {
+  clearTimeout(suggestTimer);
+  var q = e.target.value.trim();
+  suggestTimer = setTimeout(function() { showSuggestions(q); }, 200);
+});
+document.getElementById('search-input').addEventListener('focus', function(e) {
+  showSuggestions(e.target.value.trim());
+});
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.search-bar') && !e.target.closest('.search-suggestions')) {
+    document.getElementById('search-suggestions').classList.remove('show');
+  }
+});
+
+// ===== 搜索功能 =====
+function doSearchDirect(text) {
+  searchHistory = searchHistory.filter(function(h) { return h !== text; });
+  searchHistory.unshift(text);
+  if (searchHistory.length > 10) searchHistory = searchHistory.slice(0, 10);
+  saveSearchHistory();
+  window.open(currentEngine + encodeURIComponent(text), '_blank');
+}
+
+function doSearch() {
+  var q = document.getElementById('search-input').value.trim();
+  if (!q) return;
+  doSearchDirect(q);
+  document.getElementById('search-suggestions').classList.remove('show');
+}
+document.getElementById('search-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { doSearch(); }
+});
+
+// ===== 设置抽屉 =====
+function toggleSettings() {
+  var d = document.getElementById('settings-drawer');
+  if (d.classList.contains('open')) { d.classList.remove('open'); } else { d.classList.add('open'); }
+}
+function closeSettings() {
+  document.getElementById('settings-drawer').classList.remove('open');
+}
+
+function switchTab(id) {
+  var tabs = ['appearance', 'widget', 'fontcolor', 'other'];
+  document.querySelectorAll('.tab-btn').forEach(function(b, i) {
+    b.classList.toggle('active', tabs[i] === id);
+  });
+  document.querySelectorAll('.tab-content').forEach(function(c) {
+    c.classList.toggle('active', c.id === 'tab-' + id);
+  });
+}
+
+// 背景
+function setBg(url, el) {
+  document.getElementById('bg').style.backgroundImage = "url('" + url + "')";
+  document.getElementById('bg').style.backgroundColor = '';
+  settings.bgImage = url;
+  delete settings.solidBg;
+  saveSettings();
+  document.querySelectorAll('.bg-thumb').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+}
+function setSolidBg(color, el) {
+  document.getElementById('bg').style.backgroundImage = 'none';
+  document.getElementById('bg').style.backgroundColor = color;
+  settings.bgImage = '';
+  settings.solidBg = color;
+  saveSettings();
+  document.querySelectorAll('.bg-thumb').forEach(function(t) { t.classList.remove('active'); });
+  if (el) el.classList.add('active');
+}
+function applyCustomBg() {
+  var url = document.getElementById('custom-bg-url').value.trim();
+  if (!url) return;
+  document.getElementById('bg').style.backgroundImage = "url('" + url + "')";
+  document.getElementById('bg').style.backgroundColor = '';
+  settings.bgImage = url;
+  delete settings.solidBg;
+  saveSettings();
+}
+function handleLocalBg(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl = e.target.result;
+    document.getElementById('bg').style.backgroundImage = "url('" + dataUrl + "')";
+    document.getElementById('bg').style.backgroundColor = '';
+    settings.bgImage = dataUrl;
+    delete settings.solidBg;
+    saveSettings();
+    document.getElementById('custom-bg-url').value = '[本地图片] ' + file.name;
+  };
+  reader.readAsDataURL(file);
+}
+function setOverlay(v) {
+  document.getElementById('overlay-val').textContent = v + '%';
+  settings.overlay = parseInt(v);
+  saveSettings();
+  setVar('--bg-overlay', 'rgba(0,0,0,' + (v / 100) + ')');
+}
+function setBrightness(v) {
+  document.getElementById('brightness-val').textContent = v + '%';
+  settings.brightness = parseInt(v);
+  saveSettings();
+  document.getElementById('bg').style.filter = 'brightness(' + (v / 100) + ')';
+}
+
+// 主题色
+function setAccent(color, el) {
+  setVar('--accent', color);
+  settings.accent = color;
+  saveSettings();
+  document.querySelectorAll('.theme-dot').forEach(function(d) { d.classList.remove('active'); });
+  el.classList.add('active');
+  document.querySelectorAll('.day.today').forEach(function(d) { d.style.background = color; });
+}
+
+// 暗色
+function toggleDark(el) {
+  el.classList.toggle('on');
+  var isDark = el.classList.contains('on');
+  document.querySelectorAll('.card').forEach(function(c) {
+    c.style.background = isDark ? 'rgba(10,12,28,0.7)' : 'rgba(255,255,255,var(--card-opacity))';
+  });
+}
+
+// 透明度
+function setCardOpacity(v) {
+  document.getElementById('card-opacity-val').textContent = v + '%';
+  settings.cardOpacity = parseInt(v);
+  saveSettings();
+  setVar('--card-opacity', v / 100);
+}
+function setSearchOpacity(v) {
+  document.getElementById('search-opacity-val').textContent = v + '%';
+  settings.searchOpacity = parseInt(v);
+  saveSettings();
+  setVar('--search-opacity', v / 100);
+}
+function setNavOpacity(v) {
+  document.getElementById('nav-opacity-val').textContent = v + '%';
+  settings.navOpacity = parseInt(v);
+  saveSettings();
+  document.querySelectorAll('.nav-item').forEach(function(n) {
+    n.style.background = 'rgba(255,255,255,' + (v / 100) + ')';
+  });
+}
+
+// ===== 三个总体毛玻璃 =====
+// 小组件（所有 .card）
+var widgetBlurEnabled = true;
+var widgetBlurVal = 12;
+function setWidgetBlur(v) {
+  document.getElementById('blur-widget-val').textContent = v + 'px';
+  document.getElementById('blur-widget-range').value = v;
+  widgetBlurVal = parseInt(v);
+  localStorage.setItem('widgetBlurEnabled', widgetBlurEnabled);
+  localStorage.setItem('widgetBlurVal', widgetBlurVal);
+  applyWidgetBlur();
+}
+function toggleWidgetBlur(el) {
+  el.classList.toggle('on');
+  widgetBlurEnabled = el.classList.contains('on');
+  localStorage.setItem('widgetBlurEnabled', widgetBlurEnabled);
+  localStorage.setItem('widgetBlurVal', widgetBlurVal);
+  applyWidgetBlur();
+}
+function applyWidgetBlur() {
+  var b = widgetBlurEnabled ? 'blur(' + widgetBlurVal + 'px)' : 'none';
+  document.querySelectorAll('.card').forEach(function(c) {
+    c.style.backdropFilter = b; c.style.webkitBackdropFilter = b;
+  });
+}
+
+// 搜索框
+var searchBlurEnabled = true;
+var searchBlurVal = 16;
+function setSearchBlur(v) {
+  document.getElementById('blur-search-val').textContent = v + 'px';
+  document.getElementById('blur-search-range').value = v;
+  searchBlurVal = parseInt(v);
+  localStorage.setItem('searchBlurEnabled', searchBlurEnabled);
+  localStorage.setItem('searchBlurVal', searchBlurVal);
+  applySearchBlur();
+}
+function toggleSearchBlur(el) {
+  el.classList.toggle('on');
+  searchBlurEnabled = el.classList.contains('on');
+  localStorage.setItem('searchBlurEnabled', searchBlurEnabled);
+  localStorage.setItem('searchBlurVal', searchBlurVal);
+  applySearchBlur();
+}
+function applySearchBlur() {
+  var b = searchBlurEnabled ? 'blur(' + searchBlurVal + 'px)' : 'none';
+  var sb = document.querySelector('.search-bar');
+  if (sb) { sb.style.backdropFilter = b; sb.style.webkitBackdropFilter = b; }
+}
+
+// 导航按钮
+var navBlurEnabled = true;
+var navBlurVal = 8;
+function setNavBlur(v) {
+  document.getElementById('blur-nav-val').textContent = v + 'px';
+  document.getElementById('blur-nav-range').value = v;
+  navBlurVal = parseInt(v);
+  localStorage.setItem('navBlurEnabled', navBlurEnabled);
+  localStorage.setItem('navBlurVal', navBlurVal);
+  applyNavBlur();
+}
+function toggleNavBlur(el) {
+  el.classList.toggle('on');
+  navBlurEnabled = el.classList.contains('on');
+  localStorage.setItem('navBlurEnabled', navBlurEnabled);
+  localStorage.setItem('navBlurVal', navBlurVal);
+  applyNavBlur();
+}
+function applyNavBlur() {
+  var b = navBlurEnabled ? 'blur(' + navBlurVal + 'px)' : 'none';
+  document.querySelectorAll('.nav-item').forEach(function(n) {
+    n.style.backdropFilter = b; n.style.webkitBackdropFilter = b;
+  });
+}
+
+// ===== 搜索框样式 =====
+function setSbar(style, el) {
+  var bar = document.querySelector('.search-bar');
+  if (!bar) return;
+  var classes = ['sbar-card','sbar-minimal','sbar-glass','sbar-modern'];
+  classes.forEach(function(c) { bar.classList.remove(c); });
+  if (style !== 'pill') bar.classList.add('sbar-' + style);
+  document.querySelectorAll('.search-style').forEach(function(t) { t.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  localStorage.setItem('sbarStyle', style);
+}
+function loadSbar() {
+  try {
+    var style = localStorage.getItem('sbarStyle') || 'pill';
+    var el = document.querySelector('.search-style[data-s="' + style + '"]');
+    setSbar(style, el);
+  } catch(e) {}
+}
+
+// ===== 初始化毛玻璃设置 =====
+function initBlurSettings() {
+  var wE = localStorage.getItem('widgetBlurEnabled');
+  var wV = localStorage.getItem('widgetBlurVal');
+  var sE = localStorage.getItem('searchBlurEnabled');
+  var sV = localStorage.getItem('searchBlurVal');
+  var nE = localStorage.getItem('navBlurEnabled');
+  var nV = localStorage.getItem('navBlurVal');
+
+  if (wE !== null) widgetBlurEnabled = wE === 'true';
+  if (wV !== null) widgetBlurVal = parseInt(wV);
+  if (sE !== null) searchBlurEnabled = sE === 'true';
+  if (sV !== null) searchBlurVal = parseInt(sV);
+  if (nE !== null) navBlurEnabled = nE === 'true';
+  if (nV !== null) navBlurVal = parseInt(nV);
+
+  // 更新 UI
+  var wToggle = document.getElementById('blur-widget-toggle');
+  if (wToggle) wToggle.classList.toggle('on', widgetBlurEnabled);
+  document.getElementById('blur-widget-range').value = widgetBlurVal;
+  document.getElementById('blur-widget-val').textContent = widgetBlurVal + 'px';
+
+  var sToggle = document.getElementById('blur-search-toggle');
+  if (sToggle) sToggle.classList.toggle('on', searchBlurEnabled);
+  document.getElementById('blur-search-range').value = searchBlurVal;
+  document.getElementById('blur-search-val').textContent = searchBlurVal + 'px';
+
+  var nToggle = document.getElementById('blur-nav-toggle');
+  if (nToggle) nToggle.classList.toggle('on', navBlurEnabled);
+  document.getElementById('blur-nav-range').value = navBlurVal;
+  document.getElementById('blur-nav-val').textContent = navBlurVal + 'px';
+
+  // 应用
+  applyWidgetBlur();
+  applySearchBlur();
+  applyNavBlur();
+}
+
+// 字体
+function setFont(font, el) {
+  document.querySelectorAll('.font-item').forEach(function(f) { f.classList.remove('active'); });
+  el.classList.add('active');
+  setVar('--font-family', font);
+  document.body.style.fontFamily = font;
+}
+function setFontSize(v) {
+  document.getElementById('fontsize-val').textContent = v + 'px';
+  settings.fontSize = parseInt(v);
+  saveSettings();
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.style.fontSize = v + 'px'; });
+}
+
+// 字体颜色
+function setNavColor(colorHex) {
+  document.getElementById('nav-color-swatch').style.background = colorHex;
+  document.getElementById('nav-color-val').textContent = colorHex;
+  setVar('--nav-item-gradient', 'none');
+  setVar('--nav-item-color', colorHex);
+  settings.navColor = colorHex;
+  saveSettings();
+  document.querySelectorAll('.grad-dot').forEach(function(d) { d.classList.remove('active'); });
+  refreshNavItemStyles();
+}
+function setNavColorOnly(colorHex, el) {
+  setVar('--nav-item-gradient', 'none');
+  setVar('--nav-item-color', colorHex);
+  settings.navColor = colorHex;
+  saveSettings();
+  document.querySelectorAll('.grad-dot').forEach(function(d) { d.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  refreshNavItemStyles();
+}
+function setNavGradient(grad, el) {
+  setVar('--nav-item-gradient', grad);
+  settings.navColor = grad;
+  saveSettings();
+  document.querySelectorAll('.grad-dot').forEach(function(d) { d.classList.remove('active'); });
+  el.classList.add('active');
+  refreshNavItemStyles();
+}
+// 半圆两色预设
+function setNavGradientHalf(el, color1, color2) {
+  var grad = 'linear-gradient(135deg,' + color1 + ',' + color2 + ')';
+  setVar('--nav-item-gradient', grad);
+  settings.navColor = grad;
+  saveSettings();
+  document.querySelectorAll('.grad-dot').forEach(function(d) { d.classList.remove('active'); });
+  el.classList.add('active');
+  // 更新图标
+  el.style.background = color2;
+  el.style.setProperty('--dot-color1', color1);
+  refreshNavItemStyles();
+}
+function resetNavColor() {
+  setVar('--nav-item-gradient', 'none');
+  setVar('--nav-item-color', 'rgba(255,255,255,0.93)');
+  document.querySelectorAll('.grad-dot').forEach(function(d) { d.classList.remove('active'); });
+  document.getElementById('nav-color-picker').value = '#ffffff';
+  document.getElementById('nav-color-swatch').style.background = 'rgba(255,255,255,0.93)';
+  document.getElementById('nav-color-val').textContent = '#ffffff';
+  // 重置自定义渐变
+  document.getElementById('grad-color1').value = '#ff6b6b';
+  document.getElementById('grad-color1-swatch').style.background = '#ff6b6b';
+  document.getElementById('grad-color2').value = '#4ecdc4';
+  document.getElementById('grad-color2-swatch').style.background = '#4ecdc4';
+  settings.navColor = 'rgba(255,255,255,0.93)';
+  settings.navColorType = 'solid';
+  saveSettings();
+  refreshNavItemStyles();
+}
+
+// ===== 自定义渐变 =====
+function applyCustomGradient() {
+  var c1 = document.getElementById('grad-color1').value;
+  var c2 = document.getElementById('grad-color2').value;
+  document.getElementById('grad-color1-swatch').style.background = c1;
+  document.getElementById('grad-color2-swatch').style.background = c2;
+  var grad = 'linear-gradient(135deg,' + c1 + ',' + c2 + ')';
+  setVar('--nav-item-gradient', grad);
+  settings.navColor = grad;
+  saveSettings();
+  document.querySelectorAll('.grad-dot').forEach(function(d) { d.classList.remove('active'); });
+  refreshNavItemStyles();
+}
+
+// ===== 其他文字颜色（单色+渐变） =====
+// type: 0=小组件, 1=分类标题, 2=搜索框
+function setWidgetGradientHalf(el, color1, color2, type) {
+  var grad = 'linear-gradient(135deg,' + color1 + ',' + color2 + ')';
+  var prefix = type === 0 ? 'widget' : (type === 1 ? 'section' : 'search');
+  var selector = type === 0 ? '.card' : (type === 1 ? '.nav-section-title' : '.search-input');
+
+  // 更新预设高亮
+  document.querySelectorAll('[id^="' + prefix + '-grad-"]').forEach(function(d) { d.classList.remove('active'); });
+  el.classList.add('active');
+  el.style.background = color2;
+  el.style.setProperty('--dot-color1', color1);
+
+  // 查找所有文字子元素（包括倒计时的label和days）
+  var textSelector = type === 0 ? '.card, .clock-time, .clock-date, .clock-weekday, .countdown-title, .countdown-item, .countdown-item .label, .countdown-item .days, .yiyan-text, .yiyan-from, .cal-header, .cal-nav, .day-name, .day' : (type === 1 ? '.nav-section-title' : '.search-input');
+
+  // 应用渐变到所有相关元素
+  document.querySelectorAll(textSelector).forEach(function(el) {
+    el.style.backgroundImage = grad;
+    el.style.webkitBackgroundClip = 'text';
+    el.style.backgroundClip = 'text';
+    el.style.webkitTextFillColor = 'transparent';
+    el.style.color = 'transparent';
+  });
+
+  // 保存设置
+  settings[prefix + 'Color'] = grad;
+  settings[prefix + 'ColorType'] = 'gradient';
+  saveSettings();
+}
+
+function applyWidgetCustomGradient() {
+  var c1 = document.getElementById('widget-grad-color1').value;
+  var c2 = document.getElementById('widget-grad-color2').value;
+  document.getElementById('widget-grad-color1-swatch').style.background = c1;
+  document.getElementById('widget-grad-color2-swatch').style.background = c2;
+  var grad = 'linear-gradient(135deg,' + c1 + ',' + c2 + ')';
+  // 查找所有文字子元素（包括倒计时的label和days）
+  var textSelector = '.card, .clock-time, .clock-date, .clock-weekday, .countdown-title, .countdown-item, .countdown-item .label, .countdown-item .days, .yiyan-text, .yiyan-from, .cal-header, .cal-nav, .day-name, .day';
+  document.querySelectorAll(textSelector).forEach(function(el) {
+    el.style.backgroundImage = grad;
+    el.style.webkitBackgroundClip = 'text';
+    el.style.backgroundClip = 'text';
+    el.style.webkitTextFillColor = 'transparent';
+    el.style.color = 'transparent';
+  });
+  document.querySelectorAll('[id^="widget-grad-"]').forEach(function(d) { d.classList.remove('active'); });
+  document.getElementById('widget-grad-0').classList.add('active');
+  settings.widgetColor = grad;
+  settings.widgetColorType = 'gradient';
+  saveSettings();
+}
+function applySectionCustomGradient() {
+  var c1 = document.getElementById('section-grad-color1').value;
+  var c2 = document.getElementById('section-grad-color2').value;
+  document.getElementById('section-grad-color1-swatch').style.background = c1;
+  document.getElementById('section-grad-color2-swatch').style.background = c2;
+  var grad = 'linear-gradient(135deg,' + c1 + ',' + c2 + ')';
+  document.querySelectorAll('.nav-section-title').forEach(function(el) {
+    el.style.backgroundImage = grad;
+    el.style.webkitBackgroundClip = 'text';
+    el.style.backgroundClip = 'text';
+    el.style.webkitTextFillColor = 'transparent';
+    el.style.color = 'transparent';
+  });
+  document.querySelectorAll('[id^="section-grad-"]').forEach(function(d) { d.classList.remove('active'); });
+  document.getElementById('section-grad-0').classList.add('active');
+  settings.sectionColor = grad;
+  settings.sectionColorType = 'gradient';
+  saveSettings();
+}
+
+function setWidgetColorSingle(color) {
+  color = color || document.getElementById('widget-color-picker').value;
+  document.getElementById('widget-color-swatch').style.background = color;
+  document.getElementById('widget-color-val').textContent = color;
+  settings.widgetColor = color;
+  settings.widgetColorType = 'solid';
+  saveSettings();
+  // 查找所有文字子元素并设置单色（包括倒计时的label和days）
+  var textSelector = '.card, .clock-time, .clock-date, .clock-weekday, .countdown-title, .countdown-item, .countdown-item .label, .countdown-item .days, .yiyan-text, .yiyan-from, .cal-header, .cal-nav, .day-name, .day';
+  document.querySelectorAll(textSelector).forEach(function(c) {
+    c.style.backgroundImage = '';
+    c.style.webkitBackgroundClip = '';
+    c.style.backgroundClip = '';
+    c.style.webkitTextFillColor = '';
+    c.style.color = color;
+  });
+  // 倒计时天数特殊颜色（默认是 #a8d8ea）
+  document.querySelectorAll('.countdown-item .days').forEach(function(d) {
+    d.style.backgroundImage = '';
+    d.style.webkitBackgroundClip = '';
+    d.style.backgroundClip = '';
+    d.style.webkitTextFillColor = '';
+    d.style.color = '#a8d8ea';
+  });
+  document.querySelectorAll('[id^="widget-grad-"]').forEach(function(d) { d.classList.remove('active'); });
+}
+function setSectionColorSingle(color) {
+  // 如果没有传入颜色，使用颜色选择器的值
+  if (!color) {
+    color = document.getElementById('section-color-picker').value;
+  }
+  document.getElementById('section-color-swatch').style.background = color;
+  document.getElementById('section-color-val').textContent = color;
+  settings.sectionColor = color;
+  settings.sectionColorType = 'solid';
+  saveSettings();
+  document.querySelectorAll('.nav-section-title').forEach(function(t) {
+    t.style.backgroundImage = '';
+    t.style.webkitBackgroundClip = '';
+    t.style.backgroundClip = '';
+    t.style.webkitTextFillColor = '';
+    t.style.color = color;
+  });
+  document.querySelectorAll('[id^="section-grad-"]').forEach(function(d) { d.classList.remove('active'); });
+}
+
+function resetWidgetColor() {
+  setWidgetColorSingle('#ffffff');
+  document.getElementById('widget-color-picker').value = '#ffffff';
+  document.getElementById('widget-color-swatch').style.background = '#ffffff';
+  document.getElementById('widget-color-val').textContent = '#ffffff';
+  settings.widgetColor = '#ffffff';
+  settings.widgetColorType = 'solid';
+  saveSettings();
+  // 查找所有文字子元素并重置（包括倒计时的label和days）
+  var textSelector = '.card, .clock-time, .clock-date, .clock-weekday, .countdown-title, .countdown-item, .countdown-item .label, .countdown-item .days, .yiyan-text, .yiyan-from, .cal-header, .cal-nav, .day-name, .day';
+  document.querySelectorAll(textSelector).forEach(function(c) {
+    c.style.backgroundImage = '';
+    c.style.webkitBackgroundClip = '';
+    c.style.backgroundClip = '';
+    c.style.webkitTextFillColor = '';
+    c.style.color = '#ffffff';
+  });
+  // 倒计时天数特殊颜色
+  document.querySelectorAll('.countdown-item .days').forEach(function(d) {
+    d.style.color = '#a8d8ea';
+  });
+}
+function resetSectionColor() {
+  setSectionColorSingle('rgba(255,255,255,0.92)');
+  document.getElementById('section-color-swatch').style.background = 'rgba(255,255,255,0.92)';
+  document.getElementById('section-color-val').textContent = 'rgba(255,255,255,0.92)';
+  settings.sectionColor = 'rgba(255,255,255,0.92)';
+  settings.sectionColorType = 'solid';
+  saveSettings();
+  document.querySelectorAll('.nav-section-title').forEach(function(t) {
+    t.style.backgroundImage = '';
+    t.style.webkitBackgroundClip = '';
+    t.style.backgroundClip = '';
+    t.style.webkitTextFillColor = '';
+    t.style.color = 'rgba(255,255,255,0.92)';
+  });
+}
+
+// ===== 小组件显示控制 =====
+var widgetSettings = {};
+function saveWidgetSetting(key, visible) {
+  widgetSettings[key] = visible;
+  localStorage.setItem('widgetSettings', JSON.stringify(widgetSettings));
+  applyWidgetSettings();
+}
+function applyWidgetSettings() {
+  var ws = JSON.parse(localStorage.getItem('widgetSettings') || '{}');
+  var clockCard = document.getElementById('widget-clock-card');
+  var calCard = document.getElementById('widget-cal-card');
+  var countdownCard = document.getElementById('widget-countdown-card');
+  var yiyanCard = document.getElementById('widget-yiyan-card');
+
+  if (ws.clock !== undefined && clockCard) clockCard.style.display = ws.clock ? '' : 'none';
+  if (ws.cal !== undefined && calCard) calCard.style.display = ws.cal ? '' : 'none';
+  if (ws.countdown !== undefined && countdownCard) countdownCard.style.display = ws.countdown ? '' : 'none';
+  if (ws.yiyan !== undefined && yiyanCard) yiyanCard.style.display = ws.yiyan ? '' : 'none';
+
+  var weatherCard = document.getElementById('weather-greeting');
+  if (ws.weather !== undefined && weatherCard) weatherCard.style.display = ws.weather ? '' : 'none';
+  var musicCard = document.querySelector('.widget-player-card');
+  if (ws.music !== undefined && musicCard) musicCard.style.display = ws.music ? '' : 'none';
+  var hotsearchCard = document.querySelector('.widget-hotsearch-card');
+  if (ws.hotsearch !== undefined && hotsearchCard) hotsearchCard.style.display = ws.hotsearch ? '' : 'none';
+}
+function initWidgetSettings() {
+  var saved = JSON.parse(localStorage.getItem('widgetSettings') || '{}');
+  widgetSettings = saved;
+  for (var key in saved) {
+    var checkbox = document.getElementById('widget-' + key);
+    if (checkbox) checkbox.checked = saved[key];
+  }
+  applyWidgetSettings();
+  initWidgetDragSort();
+}
+function initWidgetDragSort() {
+  var list = document.getElementById('widget-order-list');
+  if (!list) return;
+  var items = list.querySelectorAll('.widget-order-item');
+  var draggingEl = null;
+
+  items.forEach(function(item) {
+    item.addEventListener('dragstart', function(e) {
+      draggingEl = item;
+      item.classList.add('is-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', item.dataset.widget);
+    });
+
+    item.addEventListener('dragend', function() {
+      if (draggingEl) draggingEl.classList.remove('is-dragging');
+      items.forEach(function(i) {
+        i.classList.remove('insert-before', 'insert-after');
+      });
+      draggingEl = null;
+    });
+
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      if (!draggingEl || item === draggingEl) return;
+      e.dataTransfer.dropEffect = 'move';
+
+      items.forEach(function(i) {
+        i.classList.remove('insert-before', 'insert-after');
+      });
+
+      var rect = item.getBoundingClientRect();
+      var midY = rect.top + rect.height / 2;
+
+      if (e.clientY < midY) {
+        item.classList.add('insert-before');
+      } else {
+        item.classList.add('insert-after');
+      }
+    });
+
+    item.addEventListener('dragleave', function(e) {
+      if (!item.contains(e.relatedTarget)) {
+        item.classList.remove('insert-before', 'insert-after');
+      }
+    });
+
+    item.addEventListener('drop', function(e) {
+      e.preventDefault();
+      if (!draggingEl || item === draggingEl) return;
+
+      var rect = item.getBoundingClientRect();
+      var midY = rect.top + rect.height / 2;
+
+      items.forEach(function(i) {
+        i.classList.remove('insert-before', 'insert-after');
+      });
+
+      if (e.clientY < midY) {
+        list.insertBefore(draggingEl, item);
+      } else {
+        list.insertBefore(draggingEl, item.nextElementSibling);
+      }
+
+      saveWidgetOrder();
+      applyWidgetOrder();
+    });
+  });
+}
+function saveWidgetOrder() {
+  var list = document.getElementById('widget-order-list');
+  var order = [];
+  list.querySelectorAll('.widget-order-item').forEach(function(item) {
+    order.push(item.dataset.widget);
+  });
+  localStorage.setItem('widgetOrder', JSON.stringify(order));
+}
+function applyWidgetOrder() {
+  var container = document.getElementById('sidebar-widgets');
+  if (!container) return;
+  var order = JSON.parse(localStorage.getItem('widgetOrder') || '["weather","clock","cal","countdown","yiyan"]');
+  var widgets = {
+    clock: '<div class="card clock-card" id="widget-clock-card" onclick="window.open(\'https://time.is/\',\'_blank\')" style="cursor:pointer;"><div class="clock-time" id="clock-hm">00:00<span class="sec" id="clock-s">00</span></div><div class="clock-sub"><span class="clock-date" id="clock-date">加载中</span><span class="clock-weekday" id="clock-week"></span></div><div class="clock-lunar" id="clock-lunar"></div></div>',
+    cal: '<div class="card" id="widget-cal-card" onclick="window.open(\'https://www.baidu.com/s?wd=%E4%B8%87%E5%B9%B4%E5%8E%86\',\'_blank\')" style="cursor:pointer;"><div class="cal-header"><button class="cal-nav" id="cal-prev">&#9664;</button><span id="cal-title" style="font-size:13px;"></span><button class="cal-nav" id="cal-next">&#9654;</button></div><div class="cal-grid" id="cal-grid"></div></div>',
+    countdown: '<div class="card" id="widget-countdown-card"><div class="countdown-title">倒计时</div><div id="countdown-list"></div></div>',
+    yiyan: '<div class="card" id="widget-yiyan-card"><div class="yiyan-text" id="yiyan-text">加载中…</div><div class="yiyan-from" id="yiyan-from"></div><button class="yiyan-more" onclick="loadYiyan()">换一条 &#8634;</button></div>',
+    weather: '<div class="weather-greeting" id="weather-greeting" data-widget="weather" onclick="window.open(\'https://tianqi.qq.com/\',\'_blank\')" style="cursor:pointer;"><div class="weather-top"><span class="weather-icon" id="weather-icon">☀️</span><span class="weather-temp" id="weather-temp">--°C</span><span class="weather-dot">·</span><span class="weather-city" id="weather-city">朔州</span></div><div class="weather-greeting-text" id="weather-greeting-text">加载中…</div></div>'
+  };
+  var html = '';
+  order.forEach(function(key) {
+    if (widgets[key]) html += widgets[key];
+  });
+  container.innerHTML = html;
+  updateClock();
+  renderCal();
+  renderCountdown();
+  loadYiyan();
+  initWidgetSettings();
+  if (typeof fetchWeather === 'function') fetchWeather();
+}
+
+// ===== 重置功能 =====
+function resetAppearance(silent) {
+  if (!silent && !confirm('确定要重置所有外观设置吗？导航数据不受影响。')) return;
+  setVar('--card-opacity', '0.18');
+  setVar('--card-blur', '12px');
+  setVar('--accent', '#4a90e2');
+  setVar('--bg-overlay', 'rgba(0,0,0,0.22)');
+  setVar('--search-opacity', '0.75');
+  setVar('--nav-item-color', 'rgba(255,255,255,0.93)');
+  setVar('--nav-item-gradient', 'none');
+  document.getElementById('bg').style.backgroundImage = "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80')";
+  document.querySelectorAll('.card').forEach(function(c) { c.style.background = ''; c.style.backdropFilter = ''; c.style.webkitBackdropFilter = ''; });
+  var sb = document.querySelector('.search-bar');
+  sb.style.backdropFilter = ''; sb.style.webkitBackdropFilter = '';
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.style.background = ''; n.style.backdropFilter = ''; n.style.webkitBackdropFilter = ''; n.style.fontSize = ''; n.style.backgroundImage = ''; n.style.webkitBackgroundClip = ''; n.style.backgroundClip = ''; n.style.webkitTextFillColor = ''; n.style.color = 'rgba(255,255,255,0.93)'; });
+  document.body.style.fontFamily = '';
+  document.getElementById('overlay-range').value = 22; document.getElementById('overlay-val').textContent = '22%';
+  document.getElementById('card-opacity-range').value = 18; document.getElementById('card-opacity-val').textContent = '18%';
+  document.getElementById('search-opacity-range').value = 75; document.getElementById('search-opacity-val').textContent = '75%';
+  document.getElementById('nav-opacity-range').value = 18; document.getElementById('nav-opacity-val').textContent = '18%';
+  document.getElementById('fontsize-range').value = 13; document.getElementById('fontsize-val').textContent = '13px';
+  document.getElementById('dark-toggle').classList.remove('on');
+  document.getElementById('card-blur-toggle').classList.add('on');
+  document.getElementById('search-blur-toggle').classList.add('on');
+  document.getElementById('nav-blur-toggle').classList.add('on');
+  // 重置导航字色
+  document.getElementById('nav-color-picker').value = '#ffffff';
+  document.getElementById('nav-color-swatch').style.background = 'rgba(255,255,255,0.93)';
+  document.getElementById('nav-color-val').textContent = '#ffffff';
+  document.querySelectorAll('#tab-fontcolor .grad-dot').forEach(function(d) { d.classList.remove('active'); });
+  document.getElementById('grad-color1').value = '#ff6b6b';
+  document.getElementById('grad-color1-swatch').style.background = '#ff6b6b';
+  document.getElementById('grad-color2').value = '#4ecdc4';
+  document.getElementById('grad-color2-swatch').style.background = '#4ecdc4';
+  // 调用 refreshNavItemStyles 应用新的 CSS 变量
+  refreshNavItemStyles();
+  // 重置小组件字色
+  document.getElementById('widget-color-picker').value = '#ffffff';
+  document.getElementById('widget-color-swatch').style.background = '#ffffff';
+  document.getElementById('widget-color-val').textContent = '#ffffff';
+  // 查找所有文字子元素并重置（包括倒计时的label和days）
+  var widgetTextSelector = '.card, .clock-time, .clock-date, .clock-weekday, .countdown-title, .countdown-item, .countdown-item .label, .countdown-item .days, .yiyan-text, .yiyan-from, .cal-header, .cal-nav, .day-name, .day';
+  document.querySelectorAll(widgetTextSelector).forEach(function(c) {
+    c.style.backgroundImage = '';
+    c.style.webkitBackgroundClip = '';
+    c.style.backgroundClip = '';
+    c.style.webkitTextFillColor = '';
+    c.style.color = '#ffffff';
+  });
+  // 倒计时天数特殊颜色
+  document.querySelectorAll('.countdown-item .days').forEach(function(d) {
+    d.style.color = '#a8d8ea';
+  });
+  // 重置分类标题颜色
+  document.getElementById('section-color-picker').value = '#ffffff';
+  document.getElementById('section-color-swatch').style.background = 'rgba(255,255,255,0.92)';
+  document.getElementById('section-color-val').textContent = 'rgba(255,255,255,0.92)';
+  document.querySelectorAll('.nav-section-title').forEach(function(t) {
+    t.style.backgroundImage = '';
+    t.style.webkitBackgroundClip = '';
+    t.style.backgroundClip = '';
+    t.style.webkitTextFillColor = '';
+    t.style.color = 'rgba(255,255,255,0.92)';
+  });
+  // 清除所有保存的设置
+  localStorage.removeItem('app-settings');
+  settings = {};
+  // 重置毛玻璃设置
+  localStorage.removeItem('widgetBlurEnabled');
+  localStorage.removeItem('widgetBlurVal');
+  localStorage.removeItem('searchBlurEnabled');
+  localStorage.removeItem('searchBlurVal');
+  localStorage.removeItem('navBlurEnabled');
+  localStorage.removeItem('navBlurVal');
+  alert('外观已重置！');
+}
+function resetNavData() {
+  if (!confirm('确定要重置所有导航数据吗？这将恢复默认导航链接，且无法撤销！')) return;
+  navData = deepClone(DEFAULT_NAV);
+  saveData();
+  renderNav();
+  alert('导航数据已重置！');
+}
+function resetAll() {
+  if (!confirm('确定要全部重置吗？外观设置和导航数据都将恢复默认，无法撤销！')) return;
+  // 重置导航
+  navData = deepClone(DEFAULT_NAV);
+  saveData();
+  // 清除所有外观相关 localStorage
+  localStorage.removeItem('app-settings');
+  localStorage.removeItem('widgetBlurEnabled');
+  localStorage.removeItem('widgetBlurVal');
+  localStorage.removeItem('searchBlurEnabled');
+  localStorage.removeItem('searchBlurVal');
+  localStorage.removeItem('navBlurEnabled');
+  localStorage.removeItem('navBlurVal');
+  settings = {};
+  // 强制刷新，确保一切从默认状态开始
+  location.reload();
+}
+
+// ===== 初始背景 =====
+(function() {
+  try {
+    var savedSettings = localStorage.getItem('app-settings');
+    if (savedSettings) {
+      var parsed = JSON.parse(savedSettings);
+      if (parsed.solidBg) {
+        document.getElementById('bg').style.backgroundImage = 'none';
+        document.getElementById('bg').style.backgroundColor = parsed.solidBg;
+        return;
+      }
+      if (parsed.bgImage) {
+        document.getElementById('bg').style.backgroundColor = '';
+        return;
+      }
+    }
+  } catch(e) {}
+  document.getElementById('bg').style.backgroundImage = "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80')";
+})();
+
+// ===== 初始化毛玻璃设置 =====
+initBlurSettings();
+
+// ===== 初始化小组件设置 =====
+initWidgetSettings();
+
+// ===== 音乐播放器（小组件） =====
+(function() {
+  var audio = new Audio();
+  var isPlaying = false;
+  var playHistory = [];
+
+  var playBtn = document.getElementById('widget-player-play');
+  var prevBtn = document.getElementById('widget-player-prev');
+  var nextBtn = document.getElementById('widget-player-next');
+  var volumeSlider = document.getElementById('widget-player-volume');
+  var volumeIcon = document.getElementById('widget-player-mute');
+  var songNameEl = document.getElementById('widget-player-song');
+  var artistEl = document.getElementById('widget-player-artist');
+  var loadingEl = document.getElementById('widget-player-loading');
+  var progressSlider = document.getElementById('widget-player-progress');
+  var currentTimeEl = document.getElementById('widget-player-current');
+  var durationTimeEl = document.getElementById('widget-player-duration');
+
+  audio.volume = 0.7;
+
+  // ===== 音乐/电台模式切换 =====
+  var playerMode = 'music';
+  window.switchPlayerMode = function(mode) {
+    if (mode === playerMode) return;
+    playerMode = mode;
+    document.querySelectorAll('.player-mode').forEach(function(el) { el.classList.remove('active'); });
+    document.getElementById('mode-' + mode).classList.add('active');
+    audio.pause();
+    isPlaying = false;
+    playBtn.textContent = '>';
+    preloadedSong = null;
+    audio.src = '';
+    loadingEl.textContent = '';
+    if (mode === 'radio') {
+      updateDisplay('夜听电台', '点击播放');
+    } else {
+      updateDisplay('随机中文歌曲', '点击播放');
+    }
+  };
+
+  // ===== 夜听电台节目池（精选近期+热门） =====
+  var radioPool = [
+    {tid:'3378824508', name:'一个人最好的活法：做自己', artist:'夜听刘筱'},
+    {tid:'3378426780', name:'人靠自己悟，不靠他人渡', artist:'夜听刘筱'},
+    {tid:'3378647152', name:'在乎你的人', artist:'夜听刘筱'},
+    {tid:'3378294966', name:'5月你好，简单的日子，慢慢过', artist:'夜听刘筱'},
+    {tid:'3378240602', name:'有一种心酸，叫假装快乐', artist:'夜听刘筱'},
+    {tid:'3378170146', name:'余生，温柔待己', artist:'夜听刘筱'},
+    {tid:'3378125406', name:'心若无事，自在从容', artist:'夜听刘筱'},
+    {tid:'3377801676', name:'最舒服的关系，是可以说废话', artist:'夜听刘筱'},
+    {tid:'3377728438', name:'请撑住，为了自己', artist:'夜听刘筱'},
+    {tid:'3377438240', name:'日子，总会苦尽甘来的', artist:'夜听刘筱'},
+    {tid:'3377402138', name:'任何关系都是，失我者永失', artist:'夜听刘筱'},
+    {tid:'3377361402', name:'心顺了，人生就顺了', artist:'夜听刘筱'},
+    {tid:'3377185226', name:'有一种累，叫想太多', artist:'夜听刘筱'},
+    {tid:'3377083648', name:'心疼你的人', artist:'夜听刘筱'},
+    {tid:'3376806628', name:'累了，就放过自己', artist:'夜听刘筱'},
+    {tid:'3376794390', name:'凡事看淡，一切随缘', artist:'夜听刘筱'},
+    {tid:'3376611484', name:'珍惜不期而遇，看淡不辞而别', artist:'夜听刘筱'},
+    {tid:'3376549388', name:'允许一切情绪发生', artist:'夜听刘筱'},
+    {tid:'3376506060', name:'如果人生可以重来', artist:'夜听刘筱'},
+    {tid:'3376288284', name:'人这一生，难在简单', artist:'夜听刘筱'},
+    {tid:'3376043380', name:'陪伴，是最长情的告白', artist:'夜听刘筱'},
+    {tid:'3375746452', name:'想你了，晚安', artist:'夜听刘筱'},
+    {tid:'3375456496', name:'人生，一半清醒，一半释然', artist:'夜听刘筱'},
+    {tid:'3375186488', name:'余生，好好过，慢慢活', artist:'夜听刘筱'},
+    {tid:'3375007936', name:'你累或不累，都无路可退', artist:'夜听刘筱'},
+    {tid:'3374828832', name:'有些爱，到此为止', artist:'夜听刘筱'},
+    {tid:'3374743736', name:'学会不在乎', artist:'夜听刘筱'},
+    {tid:'3374467336', name:'人来人往，勿失勿忘', artist:'夜听刘筱'},
+    {tid:'3374463884', name:'余生，为自己而活', artist:'夜听刘筱'},
+    {tid:'3374325808', name:'真正爱你的人', artist:'夜听刘筱'}
+  ];
+  var radioPicked = [];
+  function tryRadio(callback) {
+    if (radioPicked.length >= radioPool.length) radioPicked = [];
+    var prog;
+    do { prog = radioPool[Math.floor(Math.random() * radioPool.length)]; }
+    while (radioPicked.indexOf(prog.tid) !== -1);
+    radioPicked.push(prog.tid);
+    callback(true, {name: prog.name, artist: prog.artist, url: 'https://music.163.com/song/media/outer/url?id=' + prog.tid + '.mp3'});
+  }
+
+  // 格式化时间
+  function formatTime(seconds) {
+    var m = Math.floor(seconds / 60);
+    var s = Math.floor(seconds % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  // 进度条更新
+  audio.addEventListener('timeupdate', function() {
+    if (audio.duration) {
+      var percent = (audio.currentTime / audio.duration) * 100;
+      progressSlider.value = percent;
+      currentTimeEl.textContent = formatTime(audio.currentTime);
+      durationTimeEl.textContent = formatTime(audio.duration);
+    }
+  });
+
+  // 进度条点击跳转
+  progressSlider.addEventListener('input', function() {
+    if (audio.duration) {
+      audio.currentTime = (this.value / 100) * audio.duration;
+    }
+  });
+
+  playBtn.addEventListener('click', function() {
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      if (preloadedSong) {
+        playSong(preloadedSong.url, preloadedSong.name, preloadedSong.artist, playerMode === 'radio' ? 'radio' : 'netease');
+        preloadedSong = null;
+      } else if (!audio.src) {
+        loadRandomSong();
+      } else {
+        audio.play();
+      }
+    }
+  });
+
+  prevBtn.addEventListener('click', function() {
+    if (playHistory.length > 1) {
+      playHistory.pop();
+      var prev = playHistory[playHistory.length - 1];
+      playHistory.pop();
+      playSong(prev.url, prev.name, prev.artist, currentSource);
+    } else {
+      loadRandomSong();
+    }
+  });
+
+  nextBtn.addEventListener('click', function() {
+    loadRandomSong();
+  });
+
+  volumeSlider.addEventListener('input', function() {
+    audio.volume = this.value / 100;
+    updateVolumeIcon();
+    updateVolumeTrack();
+  });
+
+  volumeIcon.addEventListener('click', function() {
+    audio.muted = !audio.muted;
+    updateVolumeIcon();
+    updateVolumeTrack();
+  });
+
+  function updateVolumeTrack() {
+    var val = volumeSlider.value;
+    var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#4a90e2';
+    volumeSlider.style.background = 'linear-gradient(to left, ' + accent + ' ' + val + '%, rgba(74,144,226,0.25) ' + val + '%)';
+  }
+
+  // 初始化轨道颜色
+  updateVolumeTrack();
+
+  function updateVolumeIcon() {
+    volumeIcon.textContent = (audio.muted || audio.volume === 0) ? 'M' : 'V';
+  }
+
+  audio.addEventListener('play', function() {
+    isPlaying = true;
+    playBtn.textContent = 'II';
+  });
+
+  audio.addEventListener('pause', function() {
+    isPlaying = false;
+    playBtn.textContent = '>';
+  });
+
+  audio.addEventListener('ended', function() {
+    loadRandomSong();
+  });
+
+  audio.addEventListener('canplay', function() {
+    loadingEl.textContent = '';
+    // 移除自动播放 - 用户必须点击播放按钮
+  });
+
+  var currentSource = '';
+
+  function updateDisplay(name, artist) {
+    songNameEl.textContent = name || '随机播放';
+    artistEl.textContent = artist || '点击播放';
+  }
+
+  function playSong(url, name, artist, source) {
+    updateDisplay(name, artist);
+    currentSource = source || '';
+    updateDisplay(name, artist);
+    audio.src = url;
+    progressSlider.value = 0;
+    currentTimeEl.textContent = '0:00';
+    durationTimeEl.textContent = '0:00';
+    loadingEl.textContent = '加载中...';
+    isPlaying = true;
+    playBtn.textContent = 'II';
+    audio.load();
+    audio.play();
+    playHistory.push({url: url, name: name, artist: artist});
+  }
+
+
+
+  function loadRandomSong() {
+    loadingEl.textContent = '加载中...';
+    if (playerMode === 'radio') {
+      tryRadio(function(success, song) {
+        if (success) {
+          playSong(song.url, song.name, song.artist, 'radio');
+        } else {
+          loadingEl.textContent = '加载失败';
+          updateDisplay('播放失败', '请重试');
+        }
+      });
+    } else {
+      tryItunes(function(success, song) {
+        if (success) {
+          playSong(song.url, song.name, song.artist, 'itunes');
+        } else {
+          loadingEl.textContent = '加载失败';
+          updateDisplay('播放失败', '请重试');
+        }
+      });
+    }
+  }
+
+  // 歌曲加载失败时自动换一首
+  audio.addEventListener('error', function() {
+    loadingEl.textContent = playerMode === 'radio' ? '换一档节目...' : '切一首...';
+    setTimeout(function() { loadRandomSong(); }, 800);
+  });
+
+  // iTunes 随机歌曲（30秒试听）
+  function tryItunes(callback) {
+    var artists = ['周杰伦','薛之谦','林俊杰','陈奕迅','张学友','邓紫棋','王菲','五月天'];
+    var artist = artists[Math.floor(Math.random() * artists.length)];
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://itunes.apple.com/search?term=' + encodeURIComponent(artist) + '&media=music&entity=song&limit=20&country=CN', true);
+    xhr.timeout = 5000;
+    xhr.onload = function() {
+      try {
+        var data = JSON.parse(xhr.responseText);
+        if (data && data.results && data.results.length > 0) {
+          var results = data.results.filter(function(r) { return r.previewUrl; });
+          if (results.length > 0) {
+            var song = results[Math.floor(Math.random() * results.length)];
+            callback(true, {name: song.trackName, artist: song.artistName, url: song.previewUrl});
+          } else { callback(false); }
+        } else { callback(false); }
+      } catch(e) { callback(false); }
+    };
+    xhr.onerror = function() { callback(false); };
+    xhr.ontimeout = function() { callback(false); };
+    xhr.send();
+  }
+
+  // 预加载歌曲/电台信息但不加载音频源（用户点击播放时再加载）
+  var preloadedSong = null;
+  setTimeout(function() { 
+    var loader = playerMode === 'radio' ? tryRadio : tryItunes;
+    loader(function(success, song) {
+      if (success) {
+        updateDisplay(song.name, song.artist);
+        preloadedSong = song;
+      }
+    });
+  }, 1500);
+
+  // 阻止页面恢复时的自动播放
+  audio.autoplay = false;
+  window.addEventListener('pageshow', function(e) {
+    if (e.persisted) {
+      audio.pause();
+      isPlaying = false;
+      playBtn.textContent = '>';
+      progressSlider.value = 0;
+      currentTimeEl.textContent = '0:00';
+    }
+  });
+
+})();
+
+// ===== 今日热搜/头条功能 =====
+(function() {
+  var hotSearchList = document.getElementById('hotsearch-list');
+  var isLoading = false;
+  var currentPlatform = 'douyin';
+  var currentView = 'hotsearch';
+
+  window.switchHotSearchPlatform = function(platform, btn) {
+    currentPlatform = platform;
+    document.querySelectorAll('.hotsearch-tab').forEach(function(tab) {
+      tab.classList.remove('active');
+    });
+    if (btn) btn.classList.add('active');
+    if (currentView === 'headline') {
+      fetchHeadlines();
+    } else {
+      fetchHotSearch();
+    }
+  };
+
+  function fetchHotSearch() {
+    if (isLoading) return;
+    isLoading = true;
+    hotSearchList.innerHTML = '<div class="widget-hotsearch-loading">加载中...</div>';
+
+    var apiUrl = '';
+    var searchBase = '';
+
+    switch(currentPlatform) {
+      case 'bilibili':
+        searchBase = 'https://search.bilibili.com/all?keyword=';
+        fetchXxapiHot('https://v2.xxapi.cn/api/bilibilihot', searchBase, 'array');
+        return;
+      case 'weibo':
+        searchBase = 'https://s.weibo.com/weibo?q=';
+        fetchXxapiHot('https://v2.xxapi.cn/api/weibohot', searchBase, 'weibo');
+        return;
+      case 'zhihu':
+        apiUrl = 'https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total?limit=10';
+        searchBase = 'https://www.zhihu.com/search?type=content&q=';
+        fetchZhihuHot(apiUrl, searchBase);
+        return;
+      case 'douyin':
+        searchBase = 'https://www.douyin.com/search/';
+        fetchXxapiHot('https://v2.xxapi.cn/api/douyinhot', searchBase, 'douyin');
+        return;
+      default:
+        isLoading = false;
+        showFallback();
+    }
+  }
+
+
+  function fetchXxapiHot(apiUrl, searchBase, type) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', apiUrl, true);
+    xhr.timeout = 8000;
+    xhr.onload = function() {
+      isLoading = false;
+      try {
+        var data = JSON.parse(xhr.responseText);
+        if (data.code === 200 && data.data) {
+          var items = [];
+          if (type === 'array') {
+            data.data.slice(0, 10).forEach(function(title) { items.push({keyword: title}); });
+          } else if (type === 'weibo') {
+            data.data.slice(0, 10).forEach(function(item) { items.push({keyword: item.title}); });
+          } else if (type === 'douyin') {
+            data.data.slice(0, 10).forEach(function(item) { items.push({keyword: item.word}); });
+          }
+          renderHotSearch(items, 'keyword', null, searchBase);
+        } else {
+          showFallback();
+        }
+      } catch(e) { showFallback(); }
+    };
+    xhr.onerror = function() { isLoading = false; showFallback(); };
+    xhr.ontimeout = function() { isLoading = false; showFallback(); };
+    xhr.send();
+  }
+
+  function fetchZhihuHot(apiUrl, searchBase) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', apiUrl, true);
+    xhr.timeout = 8000;
+
+    xhr.onload = function() {
+      isLoading = false;
+      try {
+        var data = JSON.parse(xhr.responseText);
+        if (data.data && data.data.length > 0) {
+          renderHotSearch(data.data.slice(0, 10), 'target', 'detail_text', searchBase, true);
+        } else {
+          showZhihuFallback();
+        }
+      } catch(e) {
+        showZhihuFallback();
+      }
+    };
+    xhr.onerror = function() { isLoading = false; showZhihuFallback(); };
+    xhr.ontimeout = function() { isLoading = false; showZhihuFallback(); };
+    xhr.send();
+  }
+
+  function renderHotSearch(list, keywordKey, hotKey, searchBase, isZhihu) {
+    var html = '';
+    list.forEach(function(item, index) {
+      var rankClass = index < 3 ? ' top3' : '';
+      var keyword = '';
+      var hotInfo = '';
+
+      if (isZhihu) {
+        keyword = item.target && item.target.title ? item.target.title : '';
+        hotInfo = item.detail_text || '';
+      } else {
+        keyword = item[keywordKey] || item;
+        hotInfo = item[hotKey] || '';
+      }
+
+      if (!keyword) return;
+
+      html += '<div class="hotsearch-item" onclick="window.open(\'' + searchBase + encodeURIComponent(keyword) + '\')">' +
+              '<span class="hotsearch-rank' + rankClass + '">' + (index + 1) + '</span>' +
+              '<span class="hotsearch-text">' + keyword + '</span>' +
+              (hotInfo ? '<span class="hotsearch-hot">' + hotInfo + '</span>' : '') +
+              '</div>';
+    });
+    hotSearchList.innerHTML = html || '<div class="widget-hotsearch-loading">暂无数据</div>';
+  }
+
+  function showFallback() {
+    var topics = ['纪录片推荐','科技趋势','穿搭指南','程序员日常','AI工具','周末好去处','美食探店','健身打卡','读书笔记','旅行攻略','电影推荐','音乐分享','手工DIY','理财技巧','英语学习'];
+    var hotLabels = ['热','新','火','荐'];
+    var idx = Math.floor(Math.random() * 1000);
+    var fallbackData = [];
+    for (var i = 0; i < 10; i++) {
+      fallbackData.push({keyword: topics[(idx + i) % topics.length], hot: hotLabels[(idx + i) % hotLabels.length]});
+    }
+    renderHotSearch(fallbackData, 'keyword', 'hot', 'https://search.bilibili.com/all?keyword=');
+  }
+
+  function showWeiboFallback() {
+    var topics = ['春节联欢晚会','人工智能','时尚穿搭','票房纪录','生活指南','旅游推荐','科技发布会','美食教程','健身成功','天气预报','综艺节目','新歌首发','电竞夺冠','网红打卡','宠物日常'];
+    var hotLabels = ['沸','热','新','荐'];
+    var idx = Math.floor(Math.random() * 1000);
+    var fallbackData = [];
+    for (var i = 0; i < 10; i++) {
+      fallbackData.push({note: topics[(idx + i) % topics.length], num: hotLabels[(idx + i) % hotLabels.length]});
+    }
+    renderHotSearch(fallbackData, 'note', 'num', 'https://s.weibo.com/weibo?q=');
+  }
+
+  function showZhihuFallback() {
+    var topics = ['如何评价2026年的科技发展？','有哪些值得推荐的技术书籍？','程序员如何提升自己？','AI对各行各业的影响','2026年最值得学习的技能','如何保持健康的生活方式？','有哪些好用的工具推荐？','如何规划职业发展？','2026年的投资趋势','有哪些小众但好用的APP？','面试经验分享','副业推荐','年度书单','健康作息','学习效率提升'];
+    var hotLabels = ['沸','热','新','荐'];
+    var idx = Math.floor(Math.random() * 1000);
+    var fallbackData = [];
+    for (var i = 0; i < 10; i++) {
+      fallbackData.push({target: {title: topics[(idx + i) % topics.length]}, detail_text: hotLabels[(idx + i) % hotLabels.length]});
+    }
+    renderHotSearch(fallbackData, 'target', 'detail_text', 'https://www.zhihu.com/search?type=content&q=', true);
+  }
+
+  function showDouyinFallback() {
+    var topics = ['热门舞蹈','搞笑段子','美食探店','旅游攻略','萌宠日常','穿搭分享','健身打卡','科技数码','生活小窍门','美妆教程','游戏精彩时刻','电影解说','音乐翻唱','手工制作','户外运动','情感故事','校园生活','职场干货','摄影技巧','读书推荐'];
+    var hotLabels = ['热','新','火','荐','爆'];
+    var idx = Math.floor(Math.random() * 1000);
+    var fallbackData = [];
+    for (var i = 0; i < 10; i++) {
+      var t = topics[(idx + i) % topics.length];
+      fallbackData.push({keyword: t + ' ' + (idx % 100 + i), hot: hotLabels[(idx + i) % hotLabels.length]});
+    }
+    renderHotSearch(fallbackData, 'keyword', 'hot', 'https://www.douyin.com/search/');
+  }
+
+  // ===== 今日头条功能 =====
+
+  function showHeadlinesFallback() {
+    isLoading = false;
+    var fallback = [
+      {title: '今日头条热点新闻', source: '今日头条', time: '刚刚'},
+      {title: '国内科技巨头发布新一代AI产品', source: '今日头条', time: '5分钟前'},
+      {title: '某地区重大交通项目正式开工', source: '今日头条', time: '15分钟前'},
+      {title: '2026年高考报名人数再创新高', source: '今日头条', time: '30分钟前'},
+      {title: '国际油价大幅波动引发关注', source: '今日头条', time: '45分钟前'},
+      {title: '知名企业宣布新一轮融资', source: '今日头条', time: '1小时前'},
+      {title: '多地出台楼市新政', source: '今日头条', time: '1小时前'},
+      {title: '某体育赛事创下收视新纪录', source: '今日头条', time: '2小时前'},
+      {title: '健康科普：冬季养生小常识', source: '今日头条', time: '2小时前'},
+      {title: '旅游热门城市榜单出炉', source: '今日头条', time: '3小时前'}
+    ];
+    renderHeadlines(fallback);
+  }
+
+  function renderHeadlines(list) {
+    var searchBase = 'https://www.toutiao.com/search/?keyword=';
+
+    var html = '';
+    list.forEach(function(item, index) {
+      var rankClass = index < 3 ? ' top3' : '';
+      html += '<div class="hotsearch-item" onclick="window.open(\'' + searchBase + encodeURIComponent(item.title) + '\')">' +
+              '<span class="hotsearch-rank' + rankClass + '">' + (index + 1) + '</span>' +
+              '<div style="flex:1;min-width:0;">' +
+              '<div class="hotsearch-text" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + item.title + '</div>' +
+              '<div style="font-size:11px;opacity:0.5;margin-top:2px;">' + item.source + ' · ' + item.time + '</div>' +
+              '</div></div>';
+    });
+    hotSearchList.innerHTML = html || '<div class="widget-hotsearch-loading">暂无数据</div>';
+  }
+
+  function fetchHeadlines() {
+    if (isLoading) return;
+    isLoading = true;
+    hotSearchList.innerHTML = '<div class="widget-hotsearch-loading">加载中...</div>';
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://v2.xxapi.cn/api/toutiaohot', true);
+    xhr.timeout = 8000;
+    xhr.onload = function() {
+      isLoading = false;
+      try {
+        var data = JSON.parse(xhr.responseText);
+        if (data.code === 200 && data.data && data.data.length > 0) {
+          var items = data.data.slice(0, 10).map(function(item) {
+            return {title: item.word || item.title, source: '今日头条', time: item.hot_value ? (item.hot_value > 10000 ? (item.hot_value/10000).toFixed(1)+'万' : item.hot_value+'') : ''};
+          });
+          renderHeadlines(items);
+        } else {
+          showHeadlinesFallback();
+        }
+      } catch(e) { showHeadlinesFallback(); }
+    };
+    xhr.onerror = function() { isLoading = false; showHeadlinesFallback(); };
+    xhr.ontimeout = function() { isLoading = false; showHeadlinesFallback(); };
+    xhr.send();
+  }
+
+  window.switchHotType = function(type, btn) {
+    currentView = type;
+    document.querySelectorAll('.title-tab').forEach(function(tab) {
+      tab.classList.remove('active');
+    });
+    if (btn) btn.classList.add('active');
+
+    var platformTabs = document.getElementById('platform-tabs');
+    if (platformTabs) {
+      platformTabs.style.display = type === 'headline' ? 'none' : 'flex';
+    }
+
+    if (type === 'headline') {
+      fetchHeadlines();
+    } else {
+      fetchHotSearch();
+    }
+  };
+
+  window.refreshCurrentView = function() {
+    if (currentView === 'headline') {
+      fetchHeadlines();
+    } else {
+      fetchHotSearch();
+    }
+  };
+
+  window.refreshHotSearch = function() {
+    fetchHotSearch();
+  };
+
+  setTimeout(function() { fetchHotSearch(); }, 2000);
+})();
+
+// ===== 天气 + 问候 =====
+(function(){
+  var iconMap = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌦️',56:'🌦️',57:'🌦️',61:'🌧️',63:'🌧️',65:'🌧️',66:'🌧️',67:'🌧️',71:'🌨️',73:'🌨️',75:'🌨️',77:'🌨️',80:'🌦️',81:'🌦️',82:'🌦️',85:'🌨️',86:'🌨️',95:'⛈️',96:'⛈️',99:'⛈️'};
+  function getGreeting(){
+    var h=new Date().getHours();
+    if(h>=5&&h<12)return '早上好，帅气的主人 ☀️';
+    if(h>=12&&h<14)return '中午好，帅气的主人 🌤️';
+    if(h>=14&&h<18)return '下午好，帅气的主人 ✨';
+    if(h>=18&&h<21)return '晚上好，帅气的主人 🌆';
+    return '夜深了，帅气的主人 🌙';
+  }
+  function updateGreeting(){
+    var el=document.getElementById('weather-greeting-text');
+    if(el)el.textContent=getGreeting();
+  }
+  function fetchWeather(){
+    var url='https://api.open-meteo.com/v1/forecast?latitude=39.33&longitude=112.43&current_weather=true&timezone=Asia/Shanghai';
+    var iconEl=document.getElementById('weather-icon');
+    var tempEl=document.getElementById('weather-temp');
+    fetch(url).then(function(r){return r.json();}).then(function(data){
+      if(data&&data.current_weather){
+        var w=data.current_weather;
+        var icon=iconMap[w.weathercode]||'🌤️';
+        var temp=Math.round(w.temperature);
+        if(iconEl)iconEl.textContent=icon;
+        if(tempEl)tempEl.textContent=temp+'°C';
+      }
+    }).catch(function(){});
+    updateGreeting();
+  }
+  window.fetchWeather = fetchWeather;
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fetchWeather);
+  else fetchWeather();
+  setInterval(fetchWeather,30*60*1000);
+  setInterval(updateGreeting,60*1000);
+})();
+
+</script>
+
+<div style="position:fixed;bottom:10px;right:14px;font-size:11px;color:white;z-index:100;letter-spacing:0.5px;pointer-events:none;user-select:none;text-shadow:0 1px 4px rgba(0,0,0,0.5);opacity:0.75;">
+  设计：𝓡𝓾𝓲𝔃𝔃 ｜ 2026.05.07 ｜ Q 1367014277
+</div>
+
+</body>
+</html>
+
