@@ -8,7 +8,7 @@
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 
-html { min-width: 820px; overflow-x: auto; }
+html { overflow-x: auto; }
 
 :root {
   --card-opacity: 0.18;
@@ -25,16 +25,36 @@ html { min-width: 820px; overflow-x: auto; }
 body {
   font-family: var(--font-family);
   min-height: 100vh;
-  min-width: 820px;
   background: #1a1a2e;
   overflow-y: auto;
   overflow-x: auto;
   user-select: none;
 }
 
-/* ===== 隐藏滚动条，但保留滚轮滚动 ===== */
-body::-webkit-scrollbar { width: 0; }
+/* ===== 隐藏滚动条（垂直），底部自定义滚轮条替代 ===== */
+body::-webkit-scrollbar { width: 0; height: 0; }
 * { scrollbar-width: none; }
+
+/* ===== 底部自定义水平滚动条 ===== */
+.page-hscroll {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  z-index: 999999;
+  display: none;
+  cursor: pointer;
+}
+.page-hscroll.show { display: block; }
+.page-hscroll .track {
+  height: 100%;
+  background: rgba(255,255,255,0.22);
+  border-radius: 3px;
+  min-width: 40px;
+  position: relative;
+  transition: background 0.15s;
+}
+.page-hscroll .track:hover { background: rgba(74,144,226,0.5); }
 
 /* ===== 背景 ===== */
 #bg {
@@ -48,15 +68,14 @@ body::-webkit-scrollbar { width: 0; }
   z-index: 0; transition: background 0.3s;
 }
 
-/* ===== 三栏布局：左栏 | 中内容 | 右栏 ===== */
+/* ===== 三栏布局：左栏 | 中内容 | 右栏（响应式） ===== */
 .wrap {
   position: relative; z-index: 1;
   display: grid;
-  grid-template-columns: 210px 1fr 210px;
+  grid-template-columns: minmax(180px, 210px) 1fr minmax(180px, 210px);
   min-height: 100vh;
   padding: 20px;
   gap: 16px;
-  min-width: 820px;
 }
 
 /* ===== 毛玻璃卡片 ===== */
@@ -175,11 +194,23 @@ body::-webkit-scrollbar { width: 0; }
 .countdown-item .label { opacity:0.8; }
 .countdown-item .days { font-size:12px; color:#a8d8ea; }
 
-.yiyan-text { font-size:13px; line-height:1.75; opacity:0.88; }
-.yiyan-from { font-size:12px; opacity:0.5; margin-top:6px; text-align:right; }
+.yiyan-text {
+  font-size:13px; line-height:1.75; opacity:0.88;
+  flex: 1; min-height: 0;
+  display: -webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical;
+  overflow:hidden; text-overflow:ellipsis;
+}
+.yiyan-from { font-size:12px; opacity:0.5; margin-top:6px; text-align:right; flex-shrink:0; }
 .yiyan-more {
   background:none; border:none; color:#7ec8e3; font-size:12px;
-  cursor:pointer; padding:0; margin-top:5px; text-decoration:underline;
+  cursor:pointer; padding:0; margin-top:5px; text-decoration:underline; flex-shrink:0;
+}
+
+/* 一言卡片固定高度 */
+#widget-yiyan-card {
+  height: 160px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ===== 右侧小组件栏 ===== */
@@ -194,13 +225,23 @@ body::-webkit-scrollbar { width: 0; }
   width: 120px; height: 120px; border-radius: 50%;
   border: 3px solid rgba(255,255,255,0.88); overflow: hidden;
   box-shadow: 0 0 0 1px rgba(255,255,255,0.25), 0 4px 20px rgba(0,0,0,0.4);
+  cursor: pointer;
+  transition: opacity 0.2s;
 }
+.avatar-ring:hover { opacity: 0.85; }
 .avatar-ring img { width: 100%; height: 100%; object-fit: cover; display:block; }
 .profile-name {
   color: white; font-size: 32px;
   font-family: 'Brush Script MT','Segoe Script',cursive;
   font-style: italic; letter-spacing: 2px;
   text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  cursor: pointer;
+  transition: opacity 0.2s;
+  border-bottom: 2px solid transparent;
+}
+.profile-name:hover {
+  opacity: 0.8;
+  border-bottom-color: rgba(255,255,255,0.3);
 }
 
 /* ===== 搜索框（仿参考图样式） ===== */
@@ -548,6 +589,9 @@ input[type=range].full { width:100%; }
 
 /* 今日热搜小组件 */
 .widget-hotsearch-card {
+  height: 500px;
+  display: flex;
+  flex-direction: column;
   transition: box-shadow 0.2s;
 }
 .widget-hotsearch-card:hover { box-shadow:0 6px 24px rgba(0,0,0,0.18); }
@@ -581,7 +625,7 @@ input[type=range].full { width:100%; }
 .hotsearch-tab.active {
   background:var(--accent); color:white; font-weight:600;
 }
-.widget-hotsearch-body { max-height:400px; overflow-y:auto; } }
+.widget-hotsearch-body { flex:1; overflow-y:auto; }
 .widget-hotsearch-header {
   display:flex; align-items:center; justify-content:space-between;
   margin-bottom:12px;
@@ -606,7 +650,7 @@ input[type=range].full { width:100%; }
 .hotsearch-tab.active {
   background:var(--accent); color:white; font-weight:600;
 }
-.widget-hotsearch-body { max-height:400px; overflow-y:auto; }
+.widget-hotsearch-body { flex:1; overflow-y:auto; }
 .widget-hotsearch-loading { font-size:12px; opacity:0.5; text-align:center; padding:20px 0; }
 .hotsearch-item {
   display:flex; align-items:center; gap:10px;
@@ -928,6 +972,42 @@ input[type=range].full { width:100%; }
   border: none;
 }
 
+/* ===== 响应式适配 ===== */
+/* 1440px 以下，侧栏收缩 */
+@media (max-width: 1440px) {
+  .wrap { grid-template-columns: 180px 1fr 180px; padding: 16px; gap: 12px; }
+  .avatar-ring { width: 100px; height: 100px; }
+  .profile-name { font-size: 26px; }
+}
+
+/* 1366px 以下，继续收缩 */
+@media (max-width: 1366px) {
+  .wrap { grid-template-columns: 170px 1fr 170px; padding: 14px; gap: 10px; }
+  .avatar-ring { width: 90px; height: 90px; }
+  .profile-name { font-size: 22px; }
+}
+
+/* 1280px 以下，侧栏进一步缩小 */
+@media (max-width: 1280px) {
+  .wrap { grid-template-columns: 155px 1fr 155px; padding: 12px; gap: 8px; }
+}
+
+/* 1024px 以下，三栏变为一栏 */
+@media (max-width: 1024px) {
+  .wrap { grid-template-columns: 1fr; padding: 10px; gap: 12px; }
+  .sidebar, .right-sidebar { padding-top: 10px; }
+  .right-sidebar { padding-top: 10px; }
+  .sidebar { order: 2; }
+  .main { order: 1; }
+  .right-sidebar { order: 3; }
+  .profile { flex-direction: row; margin-top: 0; gap: 16px; }
+}
+
+/* 2K 屏幕，放大侧栏 */
+@media (min-width: 1921px) {
+  .wrap { grid-template-columns: 240px 1fr 240px; }
+}
+
 </style>
 </head>
 <body>
@@ -973,6 +1053,17 @@ input[type=range].full { width:100%; }
   <div class="ctx-sep"></div>
   <div class="ctx-item danger" onclick="ctxDeleteItem()">&#128465; 删除</div>
 </div>
+
+<!-- 右键菜单：头像 -->
+<div class="ctx-menu" id="ctx-avatar">
+  <div class="ctx-item" onclick="avatarUploadLocal()">&#128194; 本地上传</div>
+  <div class="ctx-item" onclick="avatarInputUrl()">&#128279; 输入链接</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" onclick="avatarReset()">&#128260; 恢复默认</div>
+</div>
+
+<!-- 隐藏的本地图片选择器 -->
+<input type="file" id="avatarFileInput" accept="image/*" style="display:none">
 
 <!-- 弹窗 -->
 <div class="modal-overlay" id="modal">
@@ -1389,10 +1480,18 @@ input[type=range].full { width:100%; }
     <div class="setting-row">
       <div><div class="setting-label">导航一</div></div>
       <input type="text" id="subnav-all-name" value="大全" onchange="setSubnavName('all',this.value)" style="width:80px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 8px;color:white;font-size:12px;text-align:center;">
+      <label class="toggle checkbox-style" style="margin-left:6px;">
+        <input type="checkbox" id="toggle-subnav-all" checked onchange="toggleSubnavBtn('all', this.checked)">
+        <span class="slider"></span>
+      </label>
     </div>
     <div class="setting-row">
       <div><div class="setting-label">导航二</div></div>
       <input type="text" id="subnav-work-name" value="工作" onchange="setSubnavName('work',this.value)" style="width:80px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 8px;color:white;font-size:12px;text-align:center;">
+      <label class="toggle checkbox-style" style="margin-left:6px;">
+        <input type="checkbox" id="toggle-subnav-work" checked onchange="toggleSubnavBtn('work', this.checked)">
+        <span class="slider"></span>
+      </label>
     </div>
     </div><!-- /section-body -->
 
@@ -1459,11 +1558,11 @@ input[type=range].full { width:100%; }
   <!-- 中间主区域 -->
   <div class="main">
     <div class="profile">
-      <div class="avatar-ring">
+      <div class="avatar-ring" id="avatar-ring" title="右键更换头像">
         <img src="b_d67eb84687938f35aa4051abb68cd701.jpg" alt="avatar"
              onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=Ruizz'">
       </div>
-      <div class="profile-name">&#x1D4E1;&#x1D4FE;&#x1D4F2;&#x1D503;&#x1D503;</div>
+      <div class="profile-name" id="profile-name" title="右键编辑昵称">&#x1D4E1;&#x1D4FE;&#x1D4F2;&#x1D503;&#x1D503;</div>
     </div>
 
     <!-- 搜索框（整体毛玻璃胶囊） -->
@@ -1683,6 +1782,28 @@ function loadSubnavNames() {
   }
 }
 
+// 副导航按钮显示/隐藏（分别控制）
+function toggleSubnavBtn(type, show) {
+  var key = type === 'all' ? 'showSubnavAll' : 'showSubnavWork';
+  settings[key] = show;
+  applySubnavVisibility();
+  saveSettings();
+}
+function applySubnavVisibility() {
+  var showAll = settings.showSubnavAll; if (showAll === undefined) showAll = true;
+  var showWork = settings.showSubnavWork; if (showWork === undefined) showWork = true;
+  
+  var btnAll = document.getElementById('nav-all-btn');
+  var btnWork = document.getElementById('nav-work-btn');
+  if (btnAll) btnAll.style.display = showAll ? '' : 'none';
+  if (btnWork) btnWork.style.display = showWork ? '' : 'none';
+  
+  var cbAll = document.getElementById('toggle-subnav-all');
+  var cbWork = document.getElementById('toggle-subnav-work');
+  if (cbAll) cbAll.checked = showAll;
+  if (cbWork) cbWork.checked = showWork;
+}
+
 // 搜索引擎菜单
 function toggleEngineMenu() {
   var menu = document.getElementById('engine-menu');
@@ -1802,6 +1923,7 @@ function applySettings() {
     }
   }
   if (settings.bgImage) { document.getElementById('bg').style.backgroundImage = "url('" + settings.bgImage + "')"; document.getElementById('bg').style.backgroundColor = ''; }
+  applySubnavVisibility();
 }
 function saveData() {
   try { localStorage.setItem('nav-data', JSON.stringify(navData)); } catch(e) {}
@@ -1819,6 +1941,16 @@ loadData();
 loadSettings();
 loadSubnavNames();
 loadSbar();
+
+// 应用保存的头像和昵称
+(function() {
+  if (settings.profileName) {
+    document.querySelector('.profile-name').textContent = settings.profileName;
+  }
+  if (settings.avatarUrl) {
+    document.querySelector('.avatar-ring img').src = settings.avatarUrl;
+  }
+})();
 
 // ===== 渲染导航 =====
 function renderNav() {
@@ -2085,6 +2217,76 @@ document.getElementById('modal').addEventListener('click', function(e) {
   if (e.target === document.getElementById('modal')) { closeModal(); }
 });
 
+// ===== 头像/昵称右键编辑 =====
+var defaultAvatar = 'b_d67eb84687938f35aa4051abb68cd701.jpg';
+
+// 用 JS 绑定右键事件（避免 inline 冲突）
+document.getElementById('avatar-ring').addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  var menu = document.getElementById('ctx-avatar');
+  showCtxAt(menu, e.clientX, e.clientY);
+});
+
+// 头像菜单：本地上传
+function avatarUploadLocal() {
+  hideCtx();
+  var fileInput = document.getElementById('avatarFileInput');
+  fileInput.value = '';
+  fileInput.click();
+}
+
+// 头像菜单：输入链接
+function avatarInputUrl() {
+  hideCtx();
+  showModal('更换头像', '输入图片链接：', settings.avatarUrl || defaultAvatar, function(url) {
+    if (!url) return;
+    settings.avatarUrl = url;
+    document.querySelector('.avatar-ring img').src = url;
+    saveSettings();
+  });
+}
+
+// 头像菜单：恢复默认
+function avatarReset() {
+  hideCtx();
+  settings.avatarUrl = '';
+  delete settings.avatarUrl;
+  document.querySelector('.avatar-ring img').src = defaultAvatar;
+  saveSettings();
+}
+
+// 头像本地文件上传处理
+document.getElementById('avatarFileInput').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  if (!file.type.match('image.*')) {
+    alert('请选择图片文件');
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var dataUrl = ev.target.result;
+    settings.avatarUrl = dataUrl;
+    document.querySelector('.avatar-ring img').src = dataUrl;
+    saveSettings();
+  };
+  reader.readAsDataURL(file);
+});
+
+// 昵称右键编辑（JS 绑定）
+document.getElementById('profile-name').addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  var currentName = settings.profileName || 'Ruizz';
+  showModal('编辑昵称', '输入新的昵称：', currentName, function(name) {
+    if (!name) return;
+    settings.profileName = name;
+    document.querySelector('.profile-name').textContent = name;
+    saveSettings();
+  });
+});
+
 // ===== CSS 变量工具 =====
 function setVar(k, v) { document.documentElement.style.setProperty(k, v); }
 
@@ -2237,6 +2439,34 @@ function loadYiyan() {
     });
 }
 loadYiyan();
+
+// ===== 热榜高度自适应：对齐左侧底部 =====
+function alignHotsearchHeight() {
+  var leftBottom = document.querySelector('#sidebar-widgets');
+  var hotCard = document.querySelector('.widget-hotsearch-card');
+  var rightSidebar = document.querySelector('.right-sidebar');
+  if (!leftBottom || !hotCard || !rightSidebar) return;
+  
+  var leftRect = leftBottom.getBoundingClientRect();
+  var leftBottomY = leftRect.bottom;
+  
+  var hotRect = hotCard.getBoundingClientRect();
+  var hotTopY = hotRect.top;
+  
+  var targetHeight = leftBottomY - hotTopY;
+  targetHeight = Math.max(targetHeight, 350);
+  
+  hotCard.style.height = targetHeight + 'px';
+}
+
+window.addEventListener('load', function() { setTimeout(alignHotsearchHeight, 300); });
+window.addEventListener('resize', alignHotsearchHeight);
+
+var _origLoadYiyan = loadYiyan;
+loadYiyan = function() {
+  _origLoadYiyan();
+  setTimeout(alignHotsearchHeight, 500);
+};
 
 // ===== 搜索历史和联想 =====
 var searchHistory = [];
@@ -3681,6 +3911,68 @@ initWidgetSettings();
   setInterval(updateGreeting,60*1000);
 })();
 
+</script>
+
+<!-- 底部自定义水平滚动条 -->
+<div class="page-hscroll" id="pageHscroll">
+  <div class="track" id="hscrollTrack"></div>
+</div>
+
+<script>
+// ===== 底部水平滚动条同步 =====
+(function() {
+  var container = document.getElementById('pageHscroll');
+  var track = document.getElementById('hscrollTrack');
+  var isDragging = false;
+  var startX, startLeft;
+
+  function syncHScroll() {
+    var scrollW = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
+    var clientW = document.documentElement.clientWidth;
+    if (scrollW > clientW) {
+      container.classList.add('show');
+      var ratio = clientW / scrollW;
+      var trackW = Math.max(ratio * container.offsetWidth, 40);
+      track.style.width = trackW + 'px';
+      var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft || 0;
+      var maxScroll = scrollW - clientW;
+      if (maxScroll > 0) {
+        var trackMax = container.offsetWidth - trackW;
+        track.style.transform = 'translateX(' + (scrollLeft / maxScroll * trackMax) + 'px)';
+      }
+    } else {
+      container.classList.remove('show');
+    }
+  }
+
+  document.addEventListener('mousedown', function(e) {
+    if (e.target === track || track.contains(e.target)) {
+      isDragging = true;
+      startX = e.clientX;
+      startLeft = parseFloat(track.style.transform.replace('translateX(','').replace('px)','')) || 0;
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    var scrollW = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
+    var clientW = document.documentElement.clientWidth;
+    var maxScroll = scrollW - clientW;
+    if (maxScroll <= 0) return;
+    var trackW = track.offsetWidth;
+    var trackMax = container.offsetWidth - trackW;
+    var dx = e.clientX - startX;
+    var newLeft = Math.max(0, Math.min(trackMax, startLeft + dx));
+    window.scrollTo(newLeft / trackMax * maxScroll, window.scrollY);
+    track.style.transform = 'translateX(' + newLeft + 'px)';
+  });
+  document.addEventListener('mouseup', function() { isDragging = false; });
+
+  window.addEventListener('scroll', syncHScroll);
+  window.addEventListener('resize', syncHScroll);
+  window.addEventListener('load', function() { setTimeout(syncHScroll, 200); });
+  syncHScroll();
+})();
 </script>
 
 <div style="position:fixed;bottom:10px;right:14px;font-size:11px;color:white;z-index:100;letter-spacing:0.5px;pointer-events:none;user-select:none;text-shadow:0 1px 4px rgba(0,0,0,0.5);opacity:0.75;">
