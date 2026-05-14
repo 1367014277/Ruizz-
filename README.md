@@ -59,6 +59,8 @@
 # 无需构建，无需安装，开箱即用
 git clone https://github.com/1367014277/Ruizz-nav.git
 
+（国内推荐）https://ruizz-nav.pages.dev/
+
 # 或直接双击 index.html 打开
 ```
 
