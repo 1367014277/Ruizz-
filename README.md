@@ -59,10 +59,6 @@
 # 无需构建，无需安装，开箱即用
 git clone https://github.com/1367014277/Ruizz-nav.git
 
-vercel https://ruizz-nav.vercel.app/
-
-cloudflare（国内推荐）https://ruizz-nav.pages.dev/
-
 # 或直接双击 index.html 打开
 ```
 
@@ -85,6 +81,16 @@ cloudflare（国内推荐）https://ruizz-nav.pages.dev/
 ---
 
 ## ✦ 更新日志
+
+### 2026.05.25 — v2.2
+> 新增备份与恢复功能，支持本地 + 坚果云云端双备份 📦
+
+| 新增 | 说明 |
+|------|------|
+| 📦 **本地备份/恢复** | 导出/导入 JSON 配置文件，一键迁移 |
+| ☁️ **云端备份（坚果云 WebDAV）** | 账号密码验证后，配置自动上传到坚果云 |
+| 🔑 **账号验证** | 备份前可先验证坚果云账号密码是否正确 |
+
 
 ### 2026.05.11 — v2.1
 > 完美适配1920×1080，其他分辨率自行测试 🎯

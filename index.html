@@ -1495,6 +1495,29 @@ input[type=range].full { width:100%; }
     </div>
     </div><!-- /section-body -->
 
+    <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:18px;">📦 本地备份与恢复</div>
+    <div class="section-body" style="display:none;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button class="reset-btn safe" onclick="backupLocal()">📤 本地备份（导出 JSON）</button>
+      <button class="reset-btn safe" onclick="restoreLocal()">📥 本地恢复（导入 JSON）</button>
+      <div style="font-size:11px;opacity:0.35;line-height:1.6;">备份文件默认下载到浏览器下载目录，建议另存到坚果云同步盘实现自动云端同步。</div>
+    </div>
+    </div><!-- /section-body -->
+
+    <div class="section-title collapsed" onclick="toggleSection(this)">☁️ 云端备份（坚果云 WebDAV）</div>
+    <div class="section-body" style="display:none;">
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <input type="text" id="jgy-username" placeholder="坚果云账号（手机号或邮箱）" value="" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:6px 10px;color:white;font-size:12px;">
+      <input type="password" id="jgy-password" placeholder="坚果云密码（或应用密码）" value="" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:6px 10px;color:white;font-size:12px;" onchange="saveJgyAuth()">
+      <div style="font-size:11px;opacity:0.35;">建议使用<a href="https://www.jianguoyun.com/s/help/webdav/index.html" target="_blank" style="color:var(--accent);">应用专用密码</a>，避免泄露主密码</div>
+      <button class="reset-btn safe" onclick="verifyJgy()" style="background:rgba(74,144,226,0.18);border:1px solid rgba(74,144,226,0.3);">🔑 验证账号密码</button>
+      <div style="height:4px;"></div>
+      <button class="reset-btn safe" onclick="backupCloud()">☁️ 备份到坚果云</button>
+      <button class="reset-btn safe" onclick="restoreCloud()">☁️ 从坚果云恢复</button>
+      <div id="jgy-status" style="font-size:11px;opacity:0.6;min-height:16px;"></div>
+    </div>
+    </div><!-- /section-body -->
+
     <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:18px;">🔄 重置选项</div>
     <div class="section-body" style="display:none;">
     <div style="display:flex;flex-direction:column;gap:10px;">
@@ -3972,6 +3995,214 @@ initWidgetSettings();
   window.addEventListener('resize', syncHScroll);
   window.addEventListener('load', function() { setTimeout(syncHScroll, 200); });
   syncHScroll();
+})();
+
+// ===== 备份与恢复 =====
+var JGY_DAV = 'https://dav.jianguoyun.com/dav/';
+var JGY_FILE = 'ruizz-nav-backup.json';
+
+function getAllConfig() {
+  var config = {};
+  for (var i = 0; i < localStorage.length; i++) {
+    var key = localStorage.key(i);
+    try { config[key] = JSON.parse(localStorage.getItem(key)); }
+    catch(e) { config[key] = localStorage.getItem(key); }
+  }
+  return config;
+}
+
+function setAllConfig(config) {
+  for (var key in config) {
+    if (!config.hasOwnProperty(key)) continue;
+    if (typeof config[key] === 'object' && config[key] !== null) {
+      localStorage.setItem(key, JSON.stringify(config[key]));
+    } else {
+      localStorage.setItem(key, config[key]);
+    }
+  }
+}
+
+function showBackupToast(msg) {
+  var el = document.getElementById('backup-toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'backup-toast';
+    el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.85);color:white;padding:12px 24px;border-radius:10px;font-size:14px;z-index:9999999;pointer-events:none;transition:opacity 0.3s;opacity:0;white-space:nowrap;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  clearTimeout(el._timer);
+  el._timer = setTimeout(function() { el.style.opacity = '0'; }, 2500);
+}
+
+function getJgyAuth() {
+  var u = (document.getElementById('jgy-username') || {}).value.trim();
+  var p = (document.getElementById('jgy-password') || {}).value.trim();
+  if (u && p) return { username: u, password: p };
+  var saved = localStorage.getItem('jgy_auth');
+  if (saved) {
+    try { return JSON.parse(saved); } catch(e) {}
+  }
+  return null;
+}
+
+function saveJgyAuth() {
+  var u = document.getElementById('jgy-username').value.trim();
+  var p = document.getElementById('jgy-password').value.trim();
+  if (u && p) {
+    localStorage.setItem('jgy_auth', JSON.stringify({ username: u, password: p }));
+    showBackupToast('✅ 坚果云账号已保存');
+  }
+}
+
+function restoreJgyAuth() {
+  var saved = localStorage.getItem('jgy_auth');
+  if (saved) {
+    try {
+      var a = JSON.parse(saved);
+      var ue = document.getElementById('jgy-username');
+      var pe = document.getElementById('jgy-password');
+      if (ue) ue.value = a.username || '';
+      if (pe) pe.value = a.password || '';
+    } catch(e) {}
+  }
+}
+
+// 用 fetch + Basic Auth 调 WebDAV
+function jgyRequest(method, path, body, auth, cb) {
+  var url = JGY_DAV + path;
+  var headers = {
+    'Authorization': 'Basic ' + btoa(auth.username + ':' + auth.password),
+    'Content-Type': 'application/json'
+  };
+  var opts = {
+    method: method,
+    headers: headers,
+    mode: 'cors'
+  };
+  if (body) opts.body = body;
+  fetch(url, opts).then(function(r) {
+    cb(null, r);
+  }).catch(function(err) {
+    cb(err, null);
+  });
+}
+
+function backupLocal() {
+  var config = getAllConfig();
+  var blob = new Blob([JSON.stringify(config, null, 2)], {type: 'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'Ruizz-nav-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showBackupToast('✅ 已导出配置文件，建议保存到坚果云同步盘');
+}
+
+function restoreLocal() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function() {
+    var file = input.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var config = JSON.parse(e.target.result);
+        setAllConfig(config);
+        showBackupToast('✅ 配置已恢复，即将刷新…');
+        setTimeout(function() { location.reload(); }, 1000);
+      } catch(err) {
+        showBackupToast('❌ 文件格式错误，请选择有效的备份文件');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function verifyJgy() {
+  var auth = getJgyAuth();
+  if (!auth) { showBackupToast('⚠️ 请先填写坚果云账号和密码'); return; }
+  showBackupToast('🔑 正在验证账号…');
+  fetch('/proxy/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(auth)
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.ok) {
+      showBackupToast('✅ ' + data.msg);
+      document.getElementById('jgy-status').textContent = '✅ 账号验证通过，可以备份/恢复';
+      saveJgyAuth();
+    } else {
+      showBackupToast('❌ ' + data.msg);
+      document.getElementById('jgy-status').textContent = '❌ ' + data.msg;
+    }
+  }).catch(function() {
+    showBackupToast('❌ 网络错误，请确认通过 localhost 访问本页');
+  });
+}
+
+function backupCloud() {
+  var auth = getJgyAuth();
+  if (!auth) { showBackupToast('⚠️ 请先填写坚果云账号和密码'); return; }
+  var config = getAllConfig();
+  var content = JSON.stringify(config, null, 2);
+  showBackupToast('☁️ 正在上传到坚果云…');
+  fetch('/proxy/backup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: auth.username, password: auth.password, data: content })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.ok) {
+      showBackupToast('☁️ ' + data.msg);
+      document.getElementById('jgy-status').textContent = '✅ 最近备份：' + new Date().toLocaleString();
+      localStorage.setItem('jgy_last_backup', new Date().toLocaleString());
+    } else {
+      showBackupToast('❌ ' + data.msg);
+    }
+  }).catch(function() {
+    showBackupToast('❌ 网络错误，请确认通过 localhost 访问本页');
+  });
+}
+
+function restoreCloud() {
+  var auth = getJgyAuth();
+  if (!auth) { showBackupToast('⚠️ 请先填写坚果云账号和密码'); return; }
+  showBackupToast('☁️ 正在从坚果云下载…');
+  fetch('/proxy/restore', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(auth)
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.ok) {
+      try {
+        var config = JSON.parse(data.data);
+        setAllConfig(config);
+        showBackupToast('☁️ 从坚果云恢复成功，即将刷新…');
+        setTimeout(function() { location.reload(); }, 1000);
+      } catch(e) {
+        showBackupToast('❌ 云端备份文件格式错误');
+      }
+    } else {
+      showBackupToast('❌ ' + data.msg);
+    }
+  }).catch(function() {
+    showBackupToast('❌ 网络错误，请确认通过 localhost 访问本页');
+  });
+}
+
+// 页面加载时恢复账号和上次备份时间
+(function() {
+  restoreJgyAuth();
+  var last = localStorage.getItem('jgy_last_backup');
+  var statusEl = document.getElementById('jgy-status');
+  if (last && statusEl) statusEl.textContent = '✅ 最近备份：' + last;
 })();
 </script>
 
