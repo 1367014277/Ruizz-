@@ -4000,6 +4000,7 @@ initWidgetSettings();
 // ===== 备份与恢复 =====
 var JGY_DAV = 'https://dav.jianguoyun.com/dav/';
 var JGY_FILE = 'ruizz-nav-backup.json';
+var PROXY_BASE = '';
 
 function getAllConfig() {
   var config = {};
@@ -4130,7 +4131,7 @@ function verifyJgy() {
   var auth = getJgyAuth();
   if (!auth) { showBackupToast('⚠️ 请先填写坚果云账号和密码'); return; }
   showBackupToast('🔑 正在验证账号…');
-  fetch('/proxy/verify', {
+  fetch(PROXY_BASE + '/proxy/verify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(auth)
@@ -4154,7 +4155,7 @@ function backupCloud() {
   var config = getAllConfig();
   var content = JSON.stringify(config, null, 2);
   showBackupToast('☁️ 正在上传到坚果云…');
-  fetch('/proxy/backup', {
+  fetch(PROXY_BASE + '/proxy/backup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: auth.username, password: auth.password, data: content })
@@ -4175,7 +4176,7 @@ function restoreCloud() {
   var auth = getJgyAuth();
   if (!auth) { showBackupToast('⚠️ 请先填写坚果云账号和密码'); return; }
   showBackupToast('☁️ 正在从坚果云下载…');
-  fetch('/proxy/restore', {
+  fetch(PROXY_BASE + '/proxy/restore', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(auth)
