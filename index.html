@@ -4131,7 +4131,7 @@ function verifyJgy() {
   var auth = getJgyAuth();
   if (!auth) { showBackupToast('⚠️ 请先填写坚果云账号和密码'); return; }
   showBackupToast('🔑 正在验证账号…');
-  fetch(PROXY_BASE + '/proxy/verify', {
+  fetch(PROXY_BASE + '/api/verify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(auth)
@@ -4155,7 +4155,7 @@ function backupCloud() {
   var config = getAllConfig();
   var content = JSON.stringify(config, null, 2);
   showBackupToast('☁️ 正在上传到坚果云…');
-  fetch(PROXY_BASE + '/proxy/backup', {
+  fetch(PROXY_BASE + '/api/backup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: auth.username, password: auth.password, data: content })
@@ -4176,7 +4176,7 @@ function restoreCloud() {
   var auth = getJgyAuth();
   if (!auth) { showBackupToast('⚠️ 请先填写坚果云账号和密码'); return; }
   showBackupToast('☁️ 正在从坚果云下载…');
-  fetch(PROXY_BASE + '/proxy/restore', {
+  fetch(PROXY_BASE + '/api/restore', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(auth)
