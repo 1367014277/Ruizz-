@@ -17,6 +17,7 @@ html { overflow-x: auto; }
   --accent: #4a90e2;
   --bg-overlay: rgba(0,0,0,0.22);
   --search-opacity: 0.75;
+  --nav-opacity: 0.18;
   --nav-item-color: rgba(255,255,255,0.93);
   --nav-item-color2: rgba(255,255,255,0.93);
   --nav-item-gradient: none;
@@ -359,7 +360,7 @@ body::-webkit-scrollbar { width: 0; height: 0; }
 .nav-items { display:grid; grid-template-columns:repeat(3,1fr); gap:11px; }
 .nav-item {
   display:block; text-align:center; padding:12px 6px;
-  background:rgba(255,255,255,var(--card-opacity));
+  background:rgba(255,255,255,var(--nav-opacity, var(--card-opacity)));
   backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
   border:1px solid rgba(255,255,255,0.2); border-radius:10px;
   color: var(--nav-item-color);
@@ -475,7 +476,7 @@ input[type=range]::-webkit-slider-thumb {
 input[type=range].full { width:100%; }
 .range-val { font-size:12px; color:var(--accent); min-width:34px; text-align:right; }
 
-/* ===== 搜索框样式 ===== */
+/* ===== 搜索框设置 ===== */
 .sbar-card { border-radius:14px !important; box-shadow:none !important; border-color:rgba(255,255,255,0.3) !important; }
 .sbar-minimal { border-radius:8px !important; border-color:rgba(255,255,255,0.4) !important; box-shadow:none !important; background:transparent !important; }
 .sbar-glass { border-radius:999px !important; border-color:rgba(255,255,255,0.6) !important; box-shadow:0 6px 30px rgba(0,0,0,0.3) !important; }
@@ -1227,8 +1228,16 @@ input[type=range].full { width:100%; }
 
     </div><!-- /section-body -->
 
-    <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:18px;">🔍 搜索框样式</div>
+    <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:18px;">🔍 搜索框设置</div>
     <div class="section-body" style="display:none;">
+    <!-- 搜索历史保存条数 -->
+    <div class="setting-row">
+      <div><div class="setting-label">搜索历史保存条数</div><div class="setting-desc">最多保存多少条搜索历史（1-500）</div></div>
+      <div style="display:flex;align-items:center;gap:7px;">
+        <input type="range" min="1" max="500" value="100" id="search-history-max" oninput="setSearchHistoryMax(this.value)">
+        <span class="range-val" id="search-history-max-val">100条</span>
+      </div>
+    </div>
     <div style="font-size:12px;opacity:0.55;margin-bottom:8px;">选择搜索框外观</div>
     <div class="bg-grid sbar-grid" style="grid-template-columns:repeat(3,1fr);">
       <div class="bg-thumb search-style active" data-s="pill" onclick="setSbar('pill',this)" style="display:flex;align-items:center;justify-content:center;padding:0 8px;">
@@ -1475,7 +1484,20 @@ input[type=range].full { width:100%; }
   <!-- 其他设置 -->
   <div class="tab-content" id="tab-other">
 
-    <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:0;">📂 副导航设置</div>
+    <div class="section-title" onclick="toggleSection(this)" style="margin-top:0;">💾 存储容量</div>
+    <div class="section-body">
+    <div style="font-size:12px;opacity:0.7;line-height:1.6;">
+      <div id="storage-info">计算中...</div>
+      <div style="margin-top:8px;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">
+        <div id="storage-bar" style="height:100%;background:var(--accent);border-radius:3px;width:0%;transition:width 0.3s;"></div>
+      </div>
+      <div style="margin-top:6px;font-size:11px;opacity:0.5;">
+        提示：背景图片和头像会占用较多空间。如需保存大图，建议使用图片链接而不是上传本地图片。
+      </div>
+    </div>
+    </div>
+
+    <div class="section-title collapsed" onclick="toggleSection(this)" style="margin-top:18px;">📂 副导航设置</div>
     <div class="section-body" style="display:none;">
     <div class="setting-row">
       <div><div class="setting-label">导航一</div></div>
@@ -1504,17 +1526,16 @@ input[type=range].full { width:100%; }
     </div>
     </div><!-- /section-body -->
 
-    <div class="section-title collapsed" onclick="toggleSection(this)">☁️ 云端备份（坚果云 WebDAV）</div>
+    <div class="section-title collapsed" onclick="toggleSection(this)">☁️ 云端备份（GitHub Gist）</div>
     <div class="section-body" style="display:none;">
     <div style="display:flex;flex-direction:column;gap:8px;">
-      <input type="text" id="jgy-username" placeholder="坚果云账号（手机号或邮箱）" value="" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:6px 10px;color:white;font-size:12px;">
-      <input type="password" id="jgy-password" placeholder="坚果云密码（或应用密码）" value="" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:6px 10px;color:white;font-size:12px;" onchange="saveJgyAuth()">
-      <div style="font-size:11px;opacity:0.35;">建议使用<a href="https://www.jianguoyun.com/s/help/webdav/index.html" target="_blank" style="color:var(--accent);">应用专用密码</a>，避免泄露主密码</div>
-      <button class="reset-btn safe" onclick="verifyJgy()" style="background:rgba(74,144,226,0.18);border:1px solid rgba(74,144,226,0.3);">🔑 验证账号密码</button>
+      <input type="password" id="github-token" placeholder="GitHub Personal Access Token（需要 gist 权限）" value="" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:6px 10px;color:white;font-size:12;">
+      <div style="font-size:11px;opacity:0.35;">获取 Token：GitHub → Settings → Developer settings → Personal access tokens → 勾选 gist</div>
+      <button class="reset-btn safe" onclick="saveGithubToken()" style="background:rgba(74,144,226,0.18);border:1px solid rgba(74,144,226,0.3);">🔑 保存 Token</button>
       <div style="height:4px;"></div>
-      <button class="reset-btn safe" onclick="backupCloud()">☁️ 备份到坚果云</button>
-      <button class="reset-btn safe" onclick="restoreCloud()">☁️ 从坚果云恢复</button>
-      <div id="jgy-status" style="font-size:11px;opacity:0.6;min-height:16px;"></div>
+      <button class="reset-btn safe" onclick="backupCloud()">☁️ 备份到 GitHub Gist</button>
+      <button class="reset-btn safe" onclick="restoreCloud()">☁️ 从 GitHub Gist 恢复</button>
+      <div id="github-status" style="font-size:11px;opacity:0.6;min-height:16px;"></div>
     </div>
     </div><!-- /section-body -->
 
@@ -1856,14 +1877,26 @@ document.addEventListener('click', function(e) {
 // ===== 保存/加载 =====
 var settings = {};
 function saveSettings() {
-  try { localStorage.setItem('app-settings', JSON.stringify(settings)); } catch(e) {}
+  try { 
+    localStorage.setItem('app-settings', JSON.stringify(settings)); 
+    checkStorageWarning();
+  } catch(e) {
+    alert('存储空间不足！请导出备份后清理部分数据（如背景图片、头像等）。');
+  }
+}
+function saveData() {
+  try {
+    localStorage.setItem('nav-data', JSON.stringify(navData));
+    checkStorageWarning();
+  } catch(e) {
+    alert('存储空间不足！导航数据太多，请删除部分导航项或导出备份。');
+  }
 }
 function loadSettings() {
   try {
     var s = localStorage.getItem('app-settings');
-    if (s) { settings = JSON.parse(s); }
-  } catch(e) {}
-  applySettings();
+    if (s) settings = JSON.parse(s);
+  } catch(e) { settings = {}; }
 }
 function applySettings() {
   if (settings.overlay !== undefined) {
@@ -1886,11 +1919,16 @@ function applySettings() {
     document.getElementById('search-opacity-val').textContent = settings.searchOpacity + '%';
     setVar('--search-opacity', settings.searchOpacity / 100);
   }
+  // 搜索历史保存条数（默认100）
+  if (settings.searchHistoryMax === undefined) settings.searchHistoryMax = 100;
+  var histEl = document.getElementById('search-history-max');
+  if (histEl) histEl.value = settings.searchHistoryMax;
+  var histValEl = document.getElementById('search-history-max-val');
+  if (histValEl) histValEl.textContent = settings.searchHistoryMax + '条';
   if (settings.navOpacity !== undefined) {
     document.getElementById('nav-opacity-range').value = settings.navOpacity;
     document.getElementById('nav-opacity-val').textContent = settings.navOpacity + '%';
     setVar('--nav-opacity', settings.navOpacity / 100);
-    document.querySelectorAll('.nav-item').forEach(function(n) { n.style.background = 'rgba(255,255,255,' + (settings.navOpacity / 100) + ')'; });
   }
   if (settings.fontSize !== undefined) {
     document.getElementById('fontsize-range').value = settings.fontSize;
@@ -1949,7 +1987,12 @@ function applySettings() {
   applySubnavVisibility();
 }
 function saveData() {
-  try { localStorage.setItem('nav-data', JSON.stringify(navData)); } catch(e) {}
+  try { 
+    localStorage.setItem('nav-data', JSON.stringify(navData)); 
+    checkStorageWarning();
+  } catch(e) {
+    alert('存储空间不足！导航数据太多，请删除部分导航项或导出备份。');
+  }
 }
 function loadData() {
   try {
@@ -2287,9 +2330,23 @@ document.getElementById('avatarFileInput').addEventListener('change', function(e
     alert('请选择图片文件');
     return;
   }
+  
+  // 检查文件大小（限制 500KB）
+  if (file.size > 500 * 1024) {
+    alert('头像图片太大！请选择 500KB 以下的图片。');
+    return;
+  }
+  
   var reader = new FileReader();
   reader.onload = function(ev) {
     var dataUrl = ev.target.result;
+    
+    // 检查存储容量
+    if (!checkStorageSize(dataUrl.length)) {
+      alert('存储空间不足！无法保存此头像。请尝试更小的图片，或使用图片链接。');
+      return;
+    }
+    
     settings.avatarUrl = dataUrl;
     document.querySelector('.avatar-ring img').src = dataUrl;
     saveSettings();
@@ -2505,20 +2562,93 @@ function saveSearchHistory() {
 }
 loadSearchHistory();
 
+// 转义 HTML 特殊字符（防 XSS）
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+// 转义属性值中的特殊字符
+function escapeAttr(str) {
+  return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// 检查 localStorage 剩余容量（返回 true 表示有足够空间）
+function checkStorageSize(additionalSize) {
+  try {
+    var used = JSON.stringify(localStorage).length;
+    var limit = 5 * 1024 * 1024; // 5MB
+    var newSize = used + (additionalSize || 0);
+    return newSize < limit * 0.95; // 保留 5% 余量
+  } catch(e) {
+    return false;
+  }
+}
+
+// 检查并警告存储容量
+function checkStorageWarning() {
+  try {
+    var used = JSON.stringify(localStorage).length;
+    var limit = 5 * 1024 * 1024; // 5MB
+    var percent = (used / limit) * 100;
+    
+    if (percent > 80) {
+      console.warn('⚠️ 存储空间使用超过 80% (' + percent.toFixed(1) + '%)！建议导出备份或清理部分数据。');
+    }
+  } catch(e) {}
+}
+
+// 更新存储容量显示
+function updateStorageInfo() {
+  try {
+    var used = JSON.stringify(localStorage).length;
+    var limit = 5 * 1024 * 1024; // 5MB
+    var percent = (used / limit) * 100;
+    var usedMB = (used / (1024 * 1024)).toFixed(2);
+    var limitMB = (limit / (1024 * 1024)).toFixed(0);
+    
+    var info = document.getElementById('storage-info');
+    var bar = document.getElementById('storage-bar');
+    
+    if (info) {
+      info.innerHTML = '已使用 <b>' + usedMB + ' MB</b> / ' + limitMB + ' MB（' + percent.toFixed(1) + '%）';
+    }
+    if (bar) {
+      bar.style.width = percent + '%';
+      // 超过 80% 变黄色，超过 95% 变红色
+      if (percent > 95) {
+        bar.style.background = '#e74c3c';
+      } else if (percent > 80) {
+        bar.style.background = '#f39c12';
+      } else {
+        bar.style.background = 'var(--accent)';
+      }
+    }
+  } catch(e) {}
+}
+
 function showSuggestions(query) {
   var box = document.getElementById('search-suggestions');
   
   if (!query || query.length < 1) {
     if (searchHistory.length > 0) {
       var html = '<div class="suggest-title">历史记录</div>';
-      searchHistory.slice(0, 5).forEach(function(h) {
-        html += '<div class="suggestion-item history-item" onclick="searchFromSuggestion(\'' + h.replace(/'/g, "\\'") + '\')">';
+      searchHistory.forEach(function(h) {
+        var safeH = escapeHtml(h);
+        html += '<div class="suggestion-item history-item" data-search="' + escapeAttr(h) + '">';
         html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
-        html += '<span>' + h + '</span>';
-        html += '<span class="delete-btn" onclick="event.stopPropagation(); deleteHistory(\'' + h.replace(/'/g, "\\'") + '\')">✕</span>';
+        html += '<span>' + safeH + '</span>';
+        html += '<span class="delete-btn" data-delete="' + escapeAttr(h) + '">✕</span>';
         html += '</div>';
       });
       box.innerHTML = html;
+      // 绑定点击事件
+      box.querySelectorAll('.suggestion-item[data-search]').forEach(function(el) {
+        el.addEventListener('click', function() { searchFromSuggestion(this.dataset.search); });
+      });
+      box.querySelectorAll('.delete-btn[data-delete]').forEach(function(el) {
+        el.addEventListener('click', function(e) { e.stopPropagation(); deleteHistory(this.dataset.delete); });
+      });
       box.classList.add('show');
     } else {
       box.classList.remove('show');
@@ -2529,11 +2659,16 @@ function showSuggestions(query) {
   if (matched.length > 0) {
     var html = '<div class="suggest-title">搜索建议</div>';
     matched.forEach(function(s) {
-      html += '<div class="suggestion-item" onclick="searchFromSuggestion(\'' + s.replace(/'/g, "\\'") + '\')">';
+      var safeS = escapeHtml(s);
+      html += '<div class="suggestion-item" data-search="' + escapeAttr(s) + '">';
       html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>';
-      html += '<span>' + s + '</span></div>';
+      html += '<span>' + safeS + '</span></div>';
     });
     box.innerHTML = html;
+    // 绑定点击事件
+    box.querySelectorAll('.suggestion-item[data-search]').forEach(function(el) {
+      el.addEventListener('click', function() { searchFromSuggestion(this.dataset.search); });
+    });
     box.classList.add('show');
   } else {
     box.classList.remove('show');
@@ -2571,7 +2706,7 @@ document.addEventListener('click', function(e) {
 function doSearchDirect(text) {
   searchHistory = searchHistory.filter(function(h) { return h !== text; });
   searchHistory.unshift(text);
-  if (searchHistory.length > 10) searchHistory = searchHistory.slice(0, 10);
+  if (searchHistory.length > (settings.searchHistoryMax || 100)) searchHistory = searchHistory.slice(0, (settings.searchHistoryMax || 100));
   saveSearchHistory();
   window.open(currentEngine + encodeURIComponent(text), '_blank');
 }
@@ -2603,6 +2738,11 @@ function switchTab(id) {
   document.querySelectorAll('.tab-content').forEach(function(c) {
     c.classList.toggle('active', c.id === 'tab-' + id);
   });
+  
+  // 切换到"其他设置"时，更新存储容量显示
+  if (id === 'other') {
+    updateStorageInfo();
+  }
 }
 
 // 背景
@@ -2636,9 +2776,23 @@ function applyCustomBg() {
 function handleLocalBg(input) {
   var file = input.files[0];
   if (!file) return;
+  
+  // 检查文件大小（限制 2MB）
+  if (file.size > 2 * 1024 * 1024) {
+    alert('图片太大！请选择 2MB 以下的图片。');
+    return;
+  }
+  
   var reader = new FileReader();
   reader.onload = function(e) {
     var dataUrl = e.target.result;
+    
+    // 检查存储容量
+    if (!checkStorageSize(dataUrl.length)) {
+      alert('存储空间不足！无法保存此图片。请尝试更小的图片，或使用图片链接。');
+      return;
+    }
+    
     document.getElementById('bg').style.backgroundImage = "url('" + dataUrl + "')";
     document.getElementById('bg').style.backgroundColor = '';
     settings.bgImage = dataUrl;
@@ -2693,13 +2847,20 @@ function setSearchOpacity(v) {
   saveSettings();
   setVar('--search-opacity', v / 100);
 }
+function setSearchHistoryMax(v) {
+  var max = parseInt(v) || 100;
+  if (max < 1) max = 1;
+  if (max > 500) max = 500;
+  settings.searchHistoryMax = max;
+  saveSettings();
+  var valEl = document.getElementById('search-history-max-val');
+  if (valEl) valEl.textContent = max + '条';
+}
 function setNavOpacity(v) {
   document.getElementById('nav-opacity-val').textContent = v + '%';
   settings.navOpacity = parseInt(v);
   saveSettings();
-  document.querySelectorAll('.nav-item').forEach(function(n) {
-    n.style.background = 'rgba(255,255,255,' + (v / 100) + ')';
-  });
+  setVar('--nav-opacity', v / 100);
 }
 
 // ===== 三个总体毛玻璃 =====
@@ -3747,13 +3908,19 @@ initWidgetSettings();
 
       if (!keyword) return;
 
-      html += '<div class="hotsearch-item" onclick="window.open(\'' + searchBase + encodeURIComponent(keyword) + '\')">' +
+      var safeKeyword = escapeHtml(keyword);
+      var safeHotInfo = hotInfo ? escapeHtml(hotInfo) : '';
+      html += '<div class="hotsearch-item" data-url="' + escapeAttr(searchBase + encodeURIComponent(keyword)) + '">' +
               '<span class="hotsearch-rank' + rankClass + '">' + (index + 1) + '</span>' +
-              '<span class="hotsearch-text">' + keyword + '</span>' +
-              (hotInfo ? '<span class="hotsearch-hot">' + hotInfo + '</span>' : '') +
+              '<span class="hotsearch-text">' + safeKeyword + '</span>' +
+              (safeHotInfo ? '<span class="hotsearch-hot">' + safeHotInfo + '</span>' : '') +
               '</div>';
     });
     hotSearchList.innerHTML = html || '<div class="widget-hotsearch-loading">暂无数据</div>';
+    // 绑定点击事件
+    hotSearchList.querySelectorAll('.hotsearch-item[data-url]').forEach(function(el) {
+      el.addEventListener('click', function() { window.open(this.dataset.url); });
+    });
   }
 
   function showFallback() {
@@ -4037,59 +4204,102 @@ function showBackupToast(msg) {
   el._timer = setTimeout(function() { el.style.opacity = '0'; }, 2500);
 }
 
-function getJgyAuth() {
-  var u = (document.getElementById('jgy-username') || {}).value.trim();
-  var p = (document.getElementById('jgy-password') || {}).value.trim();
-  if (u && p) return { username: u, password: p };
-  var saved = localStorage.getItem('jgy_auth');
+// ===== GitHub Gist 云端备份 =====
+function getGithubToken() {
+  var input = (document.getElementById('github-token') || {}).value.trim();
+  if (input) return input;
+  return localStorage.getItem('github_token') || null;
+}
+
+function saveGithubToken() {
+  var token = document.getElementById('github-token').value.trim();
+  if (!token) { showBackupToast('⚠️ 请先填写 GitHub Token'); return; }
+  localStorage.setItem('github_token', token);
+  showBackupToast('✅ GitHub Token 已保存');
+  var statusEl = document.getElementById('github-status');
+  if (statusEl) statusEl.textContent = '✅ Token 已保存，可以备份/恢复';
+}
+
+function restoreGithubToken() {
+  var saved = localStorage.getItem('github_token');
   if (saved) {
-    try { return JSON.parse(saved); } catch(e) {}
-  }
-  return null;
-}
-
-function saveJgyAuth() {
-  var u = document.getElementById('jgy-username').value.trim();
-  var p = document.getElementById('jgy-password').value.trim();
-  if (u && p) {
-    localStorage.setItem('jgy_auth', JSON.stringify({ username: u, password: p }));
-    showBackupToast('✅ 坚果云账号已保存');
+    var el = document.getElementById('github-token');
+    if (el) el.value = saved;
   }
 }
 
-function restoreJgyAuth() {
-  var saved = localStorage.getItem('jgy_auth');
-  if (saved) {
-    try {
-      var a = JSON.parse(saved);
-      var ue = document.getElementById('jgy-username');
-      var pe = document.getElementById('jgy-password');
-      if (ue) ue.value = a.username || '';
-      if (pe) pe.value = a.password || '';
-    } catch(e) {}
-  }
-}
-
-// 用 fetch + Basic Auth 调 WebDAV
-function jgyRequest(method, path, body, auth, cb) {
-  var url = JGY_DAV + path;
-  var headers = {
-    'Authorization': 'Basic ' + btoa(auth.username + ':' + auth.password),
-    'Content-Type': 'application/json'
+function backupCloud() {
+  var token = getGithubToken();
+  if (!token) { showBackupToast('⚠️ 请先填写并保存 GitHub Token'); return; }
+  var config = getAllConfig();
+  var content = JSON.stringify(config, null, 2);
+  var gistId = localStorage.getItem('github_gist_id');
+  var url, method;
+  var body = {
+    public: false,
+    files: { 'ruizz-nav-backup.json': { content: content } },
+    description: 'Ruizz-nav 自动备份'
   };
-  var opts = {
+  if (gistId) {
+    url = 'https://api.github.com/gists/' + gistId;
+    method = 'PATCH';
+  } else {
+    url = 'https://api.github.com/gists';
+    method = 'POST';
+  }
+  showBackupToast('☁️ 正在备份到 GitHub Gist…');
+  fetch(url, {
     method: method,
-    headers: headers,
-    mode: 'cors'
-  };
-  if (body) opts.body = body;
-  fetch(url, opts).then(function(r) {
-    cb(null, r);
+    headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function(data) {
+    localStorage.setItem('github_gist_id', data.id);
+    showBackupToast('☁️ 备份成功！');
+    var statusEl = document.getElementById('github-status');
+    if (statusEl) statusEl.textContent = '✅ 最近备份：' + new Date().toLocaleString();
+    localStorage.setItem('github_last_backup', new Date().toLocaleString());
   }).catch(function(err) {
-    cb(err, null);
+    showBackupToast('❌ 备份失败：' + err.message);
+    var statusEl = document.getElementById('github-status');
+    if (statusEl) statusEl.textContent = '❌ 备份失败：' + err.message;
   });
 }
 
+function restoreCloud() {
+  var token = getGithubToken();
+  if (!token) { showBackupToast('⚠️ 请先填写并保存 GitHub Token'); return; }
+  var gistId = localStorage.getItem('github_gist_id');
+  if (!gistId) { showBackupToast('⚠️ 未找到备份记录，请先备份'); return; }
+  showBackupToast('☁️ 正在从 GitHub Gist 恢复…');
+  fetch('https://api.github.com/gists/' + gistId, {
+    headers: { 'Authorization': 'token ' + token }
+  }).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function(data) {
+    var file = data.files && data.files['ruizz-nav-backup.json'];
+    if (!file || !file.content) throw new Error('备份文件不存在');
+    var config = JSON.parse(file.content);
+    setAllConfig(config);
+    showBackupToast('☁️ 从 GitHub Gist 恢复成功，即将刷新…');
+    setTimeout(function() { location.reload(); }, 1000);
+  }).catch(function(err) {
+    showBackupToast('❌ 恢复失败：' + err.message);
+  });
+}
+
+// 页面加载时恢复 Token 和上次备份时间
+(function() {
+  restoreGithubToken();
+  var last = localStorage.getItem('github_last_backup');
+  var statusEl = document.getElementById('github-status');
+  if (last && statusEl) statusEl.textContent = '✅ 最近备份：' + last;
+})();
+
+// ===== 本地导出/导入（不受云端备份影响）=====
 function backupLocal() {
   var config = getAllConfig();
   var blob = new Blob([JSON.stringify(config, null, 2)], {type: 'application/json'});
@@ -4101,7 +4311,7 @@ function backupLocal() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showBackupToast('✅ 已导出配置文件，建议保存到坚果云同步盘');
+  showBackupToast('✅ 已导出配置文件');
 }
 
 function restoreLocal() {
@@ -4126,85 +4336,6 @@ function restoreLocal() {
   };
   input.click();
 }
-
-function verifyJgy() {
-  var auth = getJgyAuth();
-  if (!auth) { showBackupToast('⚠️ 请先填写坚果云账号和密码'); return; }
-  showBackupToast('🔑 正在验证账号…');
-  fetch(PROXY_BASE + '/api/verify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(auth)
-  }).then(function(r) { return r.json(); }).then(function(data) {
-    if (data.ok) {
-      showBackupToast('✅ ' + data.msg);
-      document.getElementById('jgy-status').textContent = '✅ 账号验证通过，可以备份/恢复';
-      saveJgyAuth();
-    } else {
-      showBackupToast('❌ ' + data.msg);
-      document.getElementById('jgy-status').textContent = '❌ ' + data.msg;
-    }
-  }).catch(function() {
-    showBackupToast('❌ 网络错误，请确认通过 localhost 访问本页');
-  });
-}
-
-function backupCloud() {
-  var auth = getJgyAuth();
-  if (!auth) { showBackupToast('⚠️ 请先填写坚果云账号和密码'); return; }
-  var config = getAllConfig();
-  var content = JSON.stringify(config, null, 2);
-  showBackupToast('☁️ 正在上传到坚果云…');
-  fetch(PROXY_BASE + '/api/backup', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: auth.username, password: auth.password, data: content })
-  }).then(function(r) { return r.json(); }).then(function(data) {
-    if (data.ok) {
-      showBackupToast('☁️ ' + data.msg);
-      document.getElementById('jgy-status').textContent = '✅ 最近备份：' + new Date().toLocaleString();
-      localStorage.setItem('jgy_last_backup', new Date().toLocaleString());
-    } else {
-      showBackupToast('❌ ' + data.msg);
-    }
-  }).catch(function() {
-    showBackupToast('❌ 网络错误，请确认通过 localhost 访问本页');
-  });
-}
-
-function restoreCloud() {
-  var auth = getJgyAuth();
-  if (!auth) { showBackupToast('⚠️ 请先填写坚果云账号和密码'); return; }
-  showBackupToast('☁️ 正在从坚果云下载…');
-  fetch(PROXY_BASE + '/api/restore', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(auth)
-  }).then(function(r) { return r.json(); }).then(function(data) {
-    if (data.ok) {
-      try {
-        var config = JSON.parse(data.data);
-        setAllConfig(config);
-        showBackupToast('☁️ 从坚果云恢复成功，即将刷新…');
-        setTimeout(function() { location.reload(); }, 1000);
-      } catch(e) {
-        showBackupToast('❌ 云端备份文件格式错误');
-      }
-    } else {
-      showBackupToast('❌ ' + data.msg);
-    }
-  }).catch(function() {
-    showBackupToast('❌ 网络错误，请确认通过 localhost 访问本页');
-  });
-}
-
-// 页面加载时恢复账号和上次备份时间
-(function() {
-  restoreJgyAuth();
-  var last = localStorage.getItem('jgy_last_backup');
-  var statusEl = document.getElementById('jgy-status');
-  if (last && statusEl) statusEl.textContent = '✅ 最近备份：' + last;
-})();
 </script>
 
 <div style="position:fixed;bottom:10px;right:14px;font-size:11px;color:white;z-index:100;letter-spacing:0.5px;pointer-events:none;user-select:none;text-shadow:0 1px 4px rgba(0,0,0,0.5);opacity:0.75;">
