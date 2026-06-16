@@ -4009,26 +4009,61 @@ initWidgetSettings();
     isLoading = true;
     hotSearchList.innerHTML = '<div class="widget-hotsearch-loading">加载中...</div>';
 
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'https://v2.xxapi.cn/api/toutiaohot', true);
-    xhr.timeout = 8000;
-    xhr.onload = function() {
-      isLoading = false;
-      try {
-        var data = JSON.parse(xhr.responseText);
-        if (data.code === 200 && data.data && data.data.length > 0) {
-          var items = data.data.slice(0, 10).map(function(item) {
-            return {title: item.word || item.title, source: '今日头条', time: item.hot_value ? (item.hot_value > 10000 ? (item.hot_value/10000).toFixed(1)+'万' : item.hot_value+'') : ''};
-          });
-          renderHeadlines(items);
-        } else {
-          showHeadlinesFallback();
-        }
-      } catch(e) { showHeadlinesFallback(); }
-    };
-    xhr.onerror = function() { isLoading = false; showHeadlinesFallback(); };
-    xhr.ontimeout = function() { isLoading = false; showHeadlinesFallback(); };
-    xhr.send();
+    // 多个 API 源，依次尝试
+    var apiList = [
+      { url: 'https://api.vvhan.com/api/hotlist/toutiao', parser: 'vvhan' },
+      { url: 'https://v2.xxapi.cn/api/toutiaohot', parser: 'xxapi' },
+      { url: 'https://api.oioweb.cn/api/common/HotList', parser: 'oioweb' }
+    ];
+    var apiIndex = 0;
+
+    function tryNextApi() {
+      if (apiIndex >= apiList.length) {
+        showHeadlinesFallback();
+        return;
+      }
+      var api = apiList[apiIndex];
+      apiIndex++;
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', api.url, true);
+      xhr.timeout = 6000;
+      xhr.onload = function() {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          var items = [];
+          if (api.parser === 'vvhan' && data.success && data.data) {
+            items = data.data.slice(0, 10).map(function(item) {
+              return { title: item.title, source: '今日头条', time: item.hot || '' };
+            });
+          } else if (api.parser === 'xxapi' && data.code === 200 && data.data) {
+            items = data.data.slice(0, 10).map(function(item) {
+              return {
+                title: item.word || item.title || '',
+                source: '今日头条',
+                time: item.hot_value ? (item.hot_value > 10000 ? (item.hot_value/10000).toFixed(1)+'万' : item.hot_value+'') : ''
+              };
+            });
+          } else if (api.parser === 'oioweb' && data.code === 200 && data.result) {
+            items = data.result.slice(0, 10).map(function(item) {
+              return { title: item.title || item.name || '', source: '今日头条', time: '' };
+            });
+          }
+
+          if (items.length > 0) {
+            isLoading = false;
+            renderHeadlines(items);
+          } else {
+            tryNextApi();
+          }
+        } catch(e) { tryNextApi(); }
+      };
+      xhr.onerror = function() { tryNextApi(); };
+      xhr.ontimeout = function() { tryNextApi(); };
+      xhr.send();
+    }
+
+    tryNextApi();
   }
 
   window.switchHotType = function(type, btn) {
